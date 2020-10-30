@@ -171,7 +171,7 @@ public class CompanyDBController {
 
 /*    public static void main (String args []) throws SQLException, IOException{
         String dbacct, passwrd;
-        dbacct = "root";
+        dbacct = "";
         passwrd = "";
 
         CompanyDBController cont = new CompanyDBController(dbacct, passwrd);

@@ -33,30 +33,34 @@ class OptionPanel extends Panels {
 
 	public OptionPanel() {
 		try {
-			CompanyDBController cont = new CompanyDBController("root", "");
+			CompanyDBController cont = new CompanyDBController("", "");
 			setLayout(new BorderLayout());
 			
 			JLabel teamName = new JLabel("SELECT TABLE");
 			tableSelectPanel.add(teamName);
 			
-			System.out.println("aaaaaa");
 			String[] tableNames = cont.getStringSet(cont.getTables());
 			
-			System.out.println(Arrays.toString(tableNames));
 			JComboBox tableNameCB = new JComboBox(tableNames);
 			tableSelectPanel.add(tableNameCB);
 			//super.tableName에 넣기
-			System.out.println("ccccc");
+
 			String[] attrNames = cont.getAttrs("EMPLOYEE");
-			System.out.println(Arrays.toString(attrNames));
 			JLabel startAttr = new JLabel("Select Attributes");
 			columnSelectPanel.add(startAttr);
 			
 			for(int i=0;i<attrNames.length;i++) {
 				checkBoxes[i] = new JCheckBox(attrNames[i], false);
 				columnSelectPanel.add(checkBoxes[i]);
-				//checkBoxes[i].addItemListener(new myItemListener(i));
+				checkBoxes[i].addItemListener(new myItemListener(i));
 			}
+
+			JButton selectButton = new JButton("검색하기");
+			rightPanel.add(selectButton);
+
+			add(tableSelectPanel,BorderLayout.WEST);
+			add(columnSelectPanel,BorderLayout.CENTER);
+			add(rightPanel,BorderLayout.EAST);
 		} catch(Exception e) {
 			
 		}
@@ -68,11 +72,11 @@ class OptionPanel extends Panels {
 			this.num = i;
 		}
 		public void itemStateChanged(ItemEvent e) {
-			int select = 1;
+			int select = 0;
 			if(e.getStateChange() == ItemEvent.SELECTED)
 				select = 1;
 			else
-				select = -1;
+				select = 0;
 			checkValues[num] = select;
 			System.out.println(Arrays.toString(checkValues));
 		}
