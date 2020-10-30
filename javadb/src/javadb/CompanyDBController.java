@@ -126,8 +126,8 @@ public class CompanyDBController {
     }
     public static void main (String args []) throws SQLException, IOException{
         String dbacct, passwrd;
-        dbacct = "root";
-        passwrd = "2357ljhmsql@@";
+        dbacct = "";
+        passwrd = "";
 
         CompanyDBController cont = new CompanyDBController(dbacct, passwrd);
         if(cont.connectDB()) System.out.println("정상적으로 연결되었습니다.");
