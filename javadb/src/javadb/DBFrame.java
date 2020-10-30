@@ -17,7 +17,10 @@ public class DBFrame extends JFrame{
 		Container contentPane = getContentPane();
 		JPanel optionPanel = new OptionPanel();
 		JPanel resultPanel = new ResultPanel();
+		System.out.println("print 1");
 		contentPane.add(optionPanel, BorderLayout.NORTH);
+		System.out.println("print 2");
 		contentPane.add(resultPanel, BorderLayout.CENTER);
+		System.out.println("print 3");
 	}
 }

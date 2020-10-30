@@ -1,18 +1,17 @@
 package javadb;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import java.awt.GridLayout;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+	
+public class Panels extends JPanel{
+	String tableName = "";
+	String[] Columns = {};
 
-public class Panels extends JPanel{	
-	
-	
 }
 
 class NorthPanel extends Panels {
@@ -29,39 +28,53 @@ class OptionPanel extends Panels {
 	JPanel tableSelectPanel = new JPanel();
 	JPanel columnSelectPanel = new JPanel();
 	JPanel rightPanel = new JPanel();
-	String[] tableNames = {"Employee", "Department"};
-	String[] attrNames = {"ssn", "dno", "mgr_ssn"};
+	int[] checkValues = new int[10];
 	JCheckBox[] checkBoxes = new JCheckBox[10];
-	public OptionPanel(){
-		try{
-			// 수정점...
-			CompanyDBController cont = new CompanyDBController("root", "2357ljhmsql@@");
+
+	public OptionPanel() {
+		try {
+			CompanyDBController cont = new CompanyDBController("root", "");
 			setLayout(new BorderLayout());
 			
 			JLabel teamName = new JLabel("SELECT TABLE");
 			tableSelectPanel.add(teamName);
 			
-			tableNames = cont.getStringSet(cont.getTables());
+			System.out.println("aaaaaa");
+			String[] tableNames = cont.getStringSet(cont.getTables());
+			
+			System.out.println(Arrays.toString(tableNames));
 			JComboBox tableNameCB = new JComboBox(tableNames);
 			tableSelectPanel.add(tableNameCB);
-			
-			attrNames = cont.getAttrs("EMPLOYEE");
+			//super.tableName에 넣기
+			System.out.println("ccccc");
+			String[] attrNames = cont.getAttrs("EMPLOYEE");
+			System.out.println(Arrays.toString(attrNames));
 			JLabel startAttr = new JLabel("Select Attributes");
 			columnSelectPanel.add(startAttr);
 			
 			for(int i=0;i<attrNames.length;i++) {
 				checkBoxes[i] = new JCheckBox(attrNames[i], false);
 				columnSelectPanel.add(checkBoxes[i]);
+				//checkBoxes[i].addItemListener(new myItemListener(i));
 			}
-			
-			JButton selectButton = new JButton("검색하기");
-			rightPanel.add(selectButton);
-			
-			add(tableSelectPanel,BorderLayout.WEST);
-			add(columnSelectPanel,BorderLayout.CENTER);
-			add(rightPanel,BorderLayout.EAST);
 		} catch(Exception e) {
-
+			
+		}
+	}
+	
+	class myItemListener implements ItemListener{
+		int num = 0;
+		public myItemListener(int i) {
+			this.num = i;
+		}
+		public void itemStateChanged(ItemEvent e) {
+			int select = 1;
+			if(e.getStateChange() == ItemEvent.SELECTED)
+				select = 1;
+			else
+				select = -1;
+			checkValues[num] = select;
+			System.out.println(Arrays.toString(checkValues));
 		}
 	}
 }
@@ -70,5 +83,10 @@ class ResultPanel extends Panels {
 	public ResultPanel() {
 		setBackground(Color.WHITE);
 		add(new JLabel("result "));
+		//results = getResult();
+		
+//		JScrollPane scrollPanel = new JScrollPane();
+//		JFrame upperFrame = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class,this);
+//		upperFrame.add(new JLabel("SDFJL"));
 	}
 }
