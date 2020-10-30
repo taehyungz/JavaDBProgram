@@ -33,7 +33,7 @@ class OptionPanel extends Panels {
 
 	public OptionPanel() {
 		try {
-			CompanyDBController cont = new CompanyDBController("", "");
+			CompanyDBController cont = new CompanyDBController("!","@","#");
 			setLayout(new BorderLayout());
 			
 			JLabel teamName = new JLabel("SELECT TABLE");

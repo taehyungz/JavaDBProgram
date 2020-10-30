@@ -10,7 +10,7 @@ public class CompanyDBController {
     private String sqlID = null;
     private String sqlPw = null;
 
-    public CompanyDBController(final String sqlID, final String sqlPw) throws SQLException {
+    public CompanyDBController(final String sqlID, final String sqlPw, final String dbName) throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver"); //JDBC 드라이버 연결
         } catch (ClassNotFoundException e) {
@@ -18,12 +18,12 @@ public class CompanyDBController {
         }
         this.sqlID = sqlID;
         this.sqlPw = sqlPw;
-        this.connectDB();
+        this.connectDB(dbName);
     }
 
-    public boolean connectDB() throws SQLException {
+    public boolean connectDB(final String dbName) throws SQLException {
         try {
-            final String url = "jdbc:mysql://localhost:3306/company?serverTimezone=UTC";
+            final String url = "jdbc:mysql://localhost:3306/"+dbName+"?serverTimezone=UTC";
             conn = DriverManager.getConnection(url, sqlID, sqlPw);
             return true;
         } catch(SQLException e) {
@@ -167,38 +167,4 @@ public class CompanyDBController {
 
         return result;
     }
-
-
-/*    public static void main (String args []) throws SQLException, IOException{
-        String dbacct, passwrd;
-        dbacct = "";
-        passwrd = "";
-
-        CompanyDBController cont = new CompanyDBController(dbacct, passwrd);
-        if(cont.connectDB()) System.out.println("정상적으로 연결되었습니다.");
-        if(cont.insertEmp("hahaman S hoho", "123123123", "2020-10-29","hahahohocity", 'M', 12300.00, "123456789", 5)) {
-            System.out.println("정상적으로 변경되었습니다.");
-        } else {
-            System.out.println("투플변경에 실패하였습니다.");
-        }
-        System.out.println(cont.getResult(cont.selectEmp()));
-        if(cont.updateEmp("123123123", 33333.00)) {
-            System.out.println("정상적으로 변경되었습니다.");
-        } else {
-            System.out.println("투플변경에 실패하였습니다.");
-        }
-        System.out.println(cont.getResult(cont.selectEmp()));
-        if(cont.deleteEmp("123123123")) {
-            System.out.println("정상적으로 변경되었습니다.");
-        } else {
-            System.out.println("투플변경에 실패하였습니다.");
-        }
-        System.out.println(cont.getResult(cont.selectEmp()));
-        
-        String[] result = cont.getStringSet(cont.getTables());
-        System.out.println(Arrays.toString(result));
-        result = cont.getAttrs("employee");
-        System.out.println(Arrays.toString(result));
-        if(cont.deconnectDB()) System.out.println("정상적으로 연결을 해제합니다.");
-    }*/
 }
