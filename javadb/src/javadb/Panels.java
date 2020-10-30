@@ -1,15 +1,12 @@
 package javadb;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import java.awt.GridLayout;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Arrays;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-public class Panels extends JPanel{	
+public class Panels extends JPanel{
+	String tableName = "";
+	String[] Columns = {};
 }
 
 class NorthPanel extends Panels {
@@ -28,6 +25,7 @@ class OptionPanel extends Panels {
 	JPanel rightPanel = new JPanel();
 	String[] tableNames = {"Employee", "Department"};
 	String[] attrNames = {"ssn", "dno", "mgr_ssn"};
+	int[] checkValues = new int[10];
 	JCheckBox[] checkBoxes = new JCheckBox[10];
 	public OptionPanel() {
 		setLayout(new BorderLayout());
@@ -35,17 +33,19 @@ class OptionPanel extends Panels {
 		JLabel teamName = new JLabel("SELECT TABLE");
 		tableSelectPanel.add(teamName);
 		
-		tableNames = getTables();
+		//tableNames = getTables();
 		JComboBox tableNameCB = new JComboBox(tableNames);
 		tableSelectPanel.add(tableNameCB);
+		//super.tableName에 넣기
 		
-		attrNames = getAttrs();
+		//attrNames = getAttrs();
 		JLabel startAttr = new JLabel("Select Attributes");
 		columnSelectPanel.add(startAttr);
 		
 		for(int i=0;i<attrNames.length;i++) {
 			checkBoxes[i] = new JCheckBox(attrNames[i], false);
 			columnSelectPanel.add(checkBoxes[i]);
+			checkBoxes[i].addItemListener(new myItemListener(i));
 		}
 		
 		JButton selectButton = new JButton("검색하기");
@@ -55,11 +55,32 @@ class OptionPanel extends Panels {
 		add(columnSelectPanel,BorderLayout.CENTER);
 		add(rightPanel,BorderLayout.EAST);
 	}
+	
+	class myItemListener implements ItemListener{
+		int num = 0;
+		public myItemListener(int i) {
+			this.num = i;
+		}
+		public void itemStateChanged(ItemEvent e) {
+			int select = 1;
+			if(e.getStateChange() == ItemEvent.SELECTED)
+				select = 1;
+			else
+				select = -1;
+			checkValues[num] = select;
+			System.out.println(Arrays.toString(checkValues));
+		}
+	}
 }
 
 class ResultPanel extends Panels {
 	public ResultPanel() {
 		setBackground(Color.WHITE);
 		add(new JLabel("result "));
+		//results = getResult();
+		
+//		JScrollPane scrollPanel = new JScrollPane();
+//		JFrame upperFrame = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class,this);
+//		upperFrame.add(new JLabel("SDFJL"));
 	}
 }
