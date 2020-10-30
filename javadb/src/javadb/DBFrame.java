@@ -10,7 +10,7 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 
 public class DBFrame extends JFrame{
-	public DBFrame() {
+	public DBFrame(){
 		// Frame을 생성
 		this.setTitle("Java DB Program");
 		

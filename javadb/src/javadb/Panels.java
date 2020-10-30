@@ -9,7 +9,10 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+
 public class Panels extends JPanel{	
+	
+	
 }
 
 class NorthPanel extends Panels {
@@ -29,31 +32,37 @@ class OptionPanel extends Panels {
 	String[] tableNames = {"Employee", "Department"};
 	String[] attrNames = {"ssn", "dno", "mgr_ssn"};
 	JCheckBox[] checkBoxes = new JCheckBox[10];
-	public OptionPanel() {
-		setLayout(new BorderLayout());
-		
-		JLabel teamName = new JLabel("SELECT TABLE");
-		tableSelectPanel.add(teamName);
-		
-		tableNames = getTables();
-		JComboBox tableNameCB = new JComboBox(tableNames);
-		tableSelectPanel.add(tableNameCB);
-		
-		attrNames = getAttrs();
-		JLabel startAttr = new JLabel("Select Attributes");
-		columnSelectPanel.add(startAttr);
-		
-		for(int i=0;i<attrNames.length;i++) {
-			checkBoxes[i] = new JCheckBox(attrNames[i], false);
-			columnSelectPanel.add(checkBoxes[i]);
+	public OptionPanel(){
+		try{
+			// 수정점...
+			CompanyDBController cont = new CompanyDBController("root", "2357ljhmsql@@");
+			setLayout(new BorderLayout());
+			
+			JLabel teamName = new JLabel("SELECT TABLE");
+			tableSelectPanel.add(teamName);
+			
+			tableNames = cont.getStringSet(cont.getTables());
+			JComboBox tableNameCB = new JComboBox(tableNames);
+			tableSelectPanel.add(tableNameCB);
+			
+			attrNames = cont.getAttrs("EMPLOYEE");
+			JLabel startAttr = new JLabel("Select Attributes");
+			columnSelectPanel.add(startAttr);
+			
+			for(int i=0;i<attrNames.length;i++) {
+				checkBoxes[i] = new JCheckBox(attrNames[i], false);
+				columnSelectPanel.add(checkBoxes[i]);
+			}
+			
+			JButton selectButton = new JButton("검색하기");
+			rightPanel.add(selectButton);
+			
+			add(tableSelectPanel,BorderLayout.WEST);
+			add(columnSelectPanel,BorderLayout.CENTER);
+			add(rightPanel,BorderLayout.EAST);
+		} catch(Exception e) {
+
 		}
-		
-		JButton selectButton = new JButton("검색하기");
-		rightPanel.add(selectButton);
-		
-		add(tableSelectPanel,BorderLayout.WEST);
-		add(columnSelectPanel,BorderLayout.CENTER);
-		add(rightPanel,BorderLayout.EAST);
 	}
 }
 

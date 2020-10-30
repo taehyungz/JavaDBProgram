@@ -1,6 +1,8 @@
 package javadb;
 
 import java.sql.*;
+import java.util.ArrayList;
+
 import java.io.*;
 
 public class CompanyDBController {
@@ -8,7 +10,7 @@ public class CompanyDBController {
     private String sqlID = null;
     private String sqlPw = null;
 
-    public CompanyDBController(final String sqlID, final String sqlPw) {
+    public CompanyDBController(final String sqlID, final String sqlPw) throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver"); //JDBC 드라이버 연결
         } catch (ClassNotFoundException e) {
@@ -16,6 +18,7 @@ public class CompanyDBController {
         }
         this.sqlID = sqlID;
         this.sqlPw = sqlPw;
+        this.connectDB();
     }
 
     public boolean connectDB() throws SQLException {
@@ -78,6 +81,29 @@ public class CompanyDBController {
         }
     }
 
+    public String[] getAttrs(String tableName) throws SQLException {
+        String stmt = "SELECT * FROM "+ tableName +";";
+        PreparedStatement p = conn.prepareStatement(stmt);
+
+        ResultSet r = p.executeQuery();
+        ResultSetMetaData rsmd = r.getMetaData();
+
+        ArrayList<String> array = new ArrayList<String>();
+        for(int i = 1; i <= rsmd.getColumnCount(); i++) {
+            array.add(rsmd.getColumnLabel(i));
+        }
+
+        String[] result = array.toArray(new String[0]);
+
+        return result;
+    }
+
+    public ResultSet getTables() throws SQLException {
+        String stmt = "Show tables;";
+        PreparedStatement p = conn.prepareStatement(stmt);
+        return p.executeQuery();
+    }
+
     // 조건 선택
     public boolean updateEmp(String ssn, double newSalary) throws SQLException {
         String stmt = "UPDATE EMPLOYEE ";
@@ -124,10 +150,29 @@ public class CompanyDBController {
         }
         return result;
     }
-    public static void main (String args []) throws SQLException, IOException{
+
+    public String[] getStringSet(ResultSet resultSet) throws SQLException {
+        ResultSetMetaData rsmd = resultSet.getMetaData();
+        ArrayList<String> array = new ArrayList<String>();
+        
+        while(resultSet.next()) {
+            String row = "";
+            for(int i = 1; i <= rsmd.getColumnCount(); i++) {
+                row = resultSet.getString(i) + " ";
+            }
+            array.add(row);
+        }
+
+        String[] result = array.toArray(new String[0]);
+
+        return result;
+    }
+
+
+/*    public static void main (String args []) throws SQLException, IOException{
         String dbacct, passwrd;
-        dbacct = "";
-        passwrd = "";
+        dbacct = "root";
+        passwrd = "2357ljhmsql@@";
 
         CompanyDBController cont = new CompanyDBController(dbacct, passwrd);
         if(cont.connectDB()) System.out.println("정상적으로 연결되었습니다.");
@@ -149,6 +194,11 @@ public class CompanyDBController {
             System.out.println("투플변경에 실패하였습니다.");
         }
         System.out.println(cont.getResult(cont.selectEmp()));
+        
+        String[] result = cont.getStringSet(cont.getTables());
+        System.out.println(Arrays.toString(result));
+        result = cont.getAttrs("employee");
+        System.out.println(Arrays.toString(result));
         if(cont.deconnectDB()) System.out.println("정상적으로 연결을 해제합니다.");
-    }
+    }*/
 }
