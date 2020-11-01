@@ -2,7 +2,7 @@ package javadb;
 
 import java.sql.*;
 import java.util.ArrayList;
-
+import java.util.Arrays;
 import java.io.*;
 
 public class CompanyDBController {
@@ -41,10 +41,26 @@ public class CompanyDBController {
         } catch(SQLException e){ return false;}
     }
     // 부서 선택, 애트리뷰트 선택, 조건 선택
-    public ResultSet selectEmp() throws SQLException {
-        String stmt = "SELECT E.Fname, E.Minit, E.Lname, E.Ssn, E.Bdate, E.Address, E.Sex, E.Salary, S.Fname, S.Minit, S.Lname, D.Dname ";
-        stmt += "FROM EMPLOYEE as E, DEPARTMENT as D, EMPLOYEE as S ";
-        stmt += "WHERE E.Dno = D.Dnumber and E.Super_ssn = S.Ssn;";
+    public ResultSet selectEmp(int[] checked) throws SQLException {
+        String[] attrName = {"EFname", "EMinit", "ELname", "ESsn",
+                             "EBdate", "EAddress", "ESex", "ESalary",
+                             "Fname, Minit, Lname", "Dname"};
+        String stmt = "SELECT ";
+        for(int i = 0; i < checked.length; i++) {
+            if(checked[i] == 1) {
+                stmt += attrName[i] + ", ";
+            }
+        }
+        
+        
+        stmt = stmt.substring(0,stmt.length()-2);
+        stmt += " FROM (SELECT E.Fname AS EFname, E.Minit as EMinit, E.Lname as ELname, E.Ssn AS ESsn, " + 
+                "E.Bdate As EBdate, E.Address As EAddress, E.Sex AS Esex, E.Salary AS ESalary, " +
+                "S.Fname , S.Minit, S.Lname, E.dno FROM EMPLOYEE AS E " +
+                "LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn) AS A, DEPARTMENT";
+        stmt += " WHERE A.Dno = Dnumber;";
+
+        System.out.println(stmt);
 
         PreparedStatement p = conn.prepareStatement(stmt);
 
@@ -166,5 +182,19 @@ public class CompanyDBController {
         String[] result = array.toArray(new String[0]);
 
         return result;
+    }
+
+    public static void main(String[] args) {
+        try {
+            CompanyDBController cont = new CompanyDBController("root", "2357ljhmsql@@", "company");
+
+            int[] checked = {1,0,0,1,1,1,1,1,1,1};
+
+            System.out.println(Arrays.toString(cont.getStringSet(cont.selectEmp(checked))));
+
+            cont.deconnectDB();
+        } catch(Exception e) {
+
+        }
     }
 }
