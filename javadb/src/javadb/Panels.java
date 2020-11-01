@@ -118,3 +118,29 @@ class ResultPanel extends Panels {
 //		upperFrame.add(new JLabel("SDFJL"));
 	}
 }
+
+class BottomPanel extends Panels {
+	JPanel removePanel = new JPanel();
+
+	public BottomPanel() {
+		setLayout(new BorderLayout());
+
+		JLabel removeLabel = new JLabel("선택한 데이터 삭제");
+		removePanel.add(removeLabel);
+
+		JButton selectButton = new JButton("삭제");
+		selectButton.addActionListener(new myButtonListener());
+		removePanel.add(selectButton);
+
+		add(removePanel, BorderLayout.EAST);
+	}
+
+	class myButtonListener implements ActionListener {
+		public myButtonListener() {}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			System.out.println("push button!");
+		}
+	}
+}
