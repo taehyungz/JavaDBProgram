@@ -29,6 +29,7 @@ class OptionPanel extends Panels {
 	JPanel columnSelectPanel = new JPanel();
 	JPanel rightPanel = new JPanel();
 	int[] checkValues = new int[10];
+//	int tableNumber = 0;
 	JCheckBox[] checkBoxes = new JCheckBox[10];
 
 	public OptionPanel() {
@@ -36,13 +37,14 @@ class OptionPanel extends Panels {
 			CompanyDBController cont = new CompanyDBController("!","@","#");
 			setLayout(new BorderLayout());
 			
-			JLabel teamName = new JLabel("SELECT TABLE");
+			JLabel teamName = new JLabel("직원 정보 검색 시스템");
 			tableSelectPanel.add(teamName);
 			
-			String[] tableNames = cont.getStringSet(cont.getTables());
+			//String[] tableNames = cont.getStringSet(cont.getTables());
 			
-			JComboBox tableNameCB = new JComboBox(tableNames);
-			tableSelectPanel.add(tableNameCB);
+			//JComboBox tableNameCB = new JComboBox(tableNames);
+			//tableNameCB.addActionListener(new myCBListener());
+			//tableSelectPanel.add(tableNameCB);
 			//super.tableName에 넣기
 
 			String[] attrNames = cont.getAttrs("EMPLOYEE");
@@ -56,6 +58,7 @@ class OptionPanel extends Panels {
 			}
 
 			JButton selectButton = new JButton("검색하기");
+			selectButton.addActionListener(new mySelectListener());
 			rightPanel.add(selectButton);
 
 			add(tableSelectPanel,BorderLayout.WEST);
@@ -65,7 +68,18 @@ class OptionPanel extends Panels {
 			
 		}
 	}
-	
+//	
+//	class myCBListener implements ActionListener{
+//		@Override
+//		public void actionPerformed(ActionEvent e) {
+//			JComboBox cb = (JComboBox) e.getSource();
+//			tableNumber = cb.getSelectedIndex();
+//			//db안의 몇 번째 테이블인지를 반환
+//			//System.out.println(tableNumber);
+//		}
+//		
+//	}
+//	
 	class myItemListener implements ItemListener{
 		int num = 0;
 		public myItemListener(int i) {
@@ -78,7 +92,17 @@ class OptionPanel extends Panels {
 			else
 				select = 0;
 			checkValues[num] = select;
-			System.out.println(Arrays.toString(checkValues));
+		}
+	}
+	
+	class mySelectListener implements ActionListener{
+		public mySelectListener() {
+			
+		}
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			System.out.println("checkbox : "+Arrays.toString(checkValues));
+			System.out.println("쿼리문을 실행합니다.");
 		}
 	}
 }
