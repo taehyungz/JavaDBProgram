@@ -11,7 +11,6 @@ import javax.swing.JComboBox;
 public class Panels extends JPanel{
 	String tableName = "";
 	String[] Columns = {};
-
 }
 
 class NorthPanel extends Panels {
@@ -31,10 +30,10 @@ class OptionPanel extends Panels {
 	int[] checkValues = new int[10];
 //	int tableNumber = 0;
 	JCheckBox[] checkBoxes = new JCheckBox[10];
+	CompanyDBController cont = new CompanyDBController("!","@","#");
 
 	public OptionPanel() {
 		try {
-			CompanyDBController cont = new CompanyDBController("!","@","#");
 			setLayout(new BorderLayout());
 			
 			JLabel teamName = new JLabel("직원 정보 검색 시스템");
@@ -103,6 +102,7 @@ class OptionPanel extends Panels {
 		public void actionPerformed(ActionEvent e) {
 			System.out.println("checkbox : "+Arrays.toString(checkValues));
 			System.out.println("쿼리문을 실행합니다.");
+			System.out.println(cont.getResult(cont.selectEmp(checkValues)));
 		}
 	}
 }

@@ -10,18 +10,20 @@ public class CompanyDBController {
     private String sqlID = null;
     private String sqlPw = null;
 
-    public CompanyDBController(final String sqlID, final String sqlPw, final String dbName) throws SQLException {
+    public CompanyDBController(final String sqlID, final String sqlPw, final String dbName) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver"); //JDBC 드라이버 연결
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        this.sqlID = sqlID;
-        this.sqlPw = sqlPw;
-        this.connectDB(dbName);
+        try {
+            this.sqlID = sqlID;
+            this.sqlPw = sqlPw;
+            this.connectDB(dbName);
+        } catch(Exception e) {}
     }
 
-    public boolean connectDB(final String dbName) throws SQLException {
+    public boolean connectDB(final String dbName){
         try {
             final String url = "jdbc:mysql://localhost:3306/"+dbName+"?serverTimezone=UTC";
             conn = DriverManager.getConnection(url, sqlID, sqlPw);
@@ -31,7 +33,7 @@ public class CompanyDBController {
         }
     }
 
-    public boolean deconnectDB() throws SQLException {
+    public boolean deconnectDB() {
         try {
             if(conn != null) {
                 conn.close();
@@ -41,7 +43,7 @@ public class CompanyDBController {
         } catch(SQLException e){ return false;}
     }
     // 부서 선택, 애트리뷰트 선택, 조건 선택
-    public ResultSet selectEmp(int[] checked) throws SQLException {
+    public ResultSet selectEmp(int[] checked) {
         String[] attrName = {"EFname", "EMinit", "ELname", "ESsn",
                              "EBdate", "EAddress", "ESex", "ESalary",
                              "Fname, Minit, Lname", "Dname"};
@@ -61,10 +63,13 @@ public class CompanyDBController {
         stmt += " WHERE A.Dno = Dnumber;";
 
         System.out.println(stmt);
+        try {
+            PreparedStatement p = conn.prepareStatement(stmt);
 
-        PreparedStatement p = conn.prepareStatement(stmt);
-
-        return p.executeQuery();
+            return p.executeQuery();
+        } catch(Exception e) {
+            return null;
+        }
     }
     
     public boolean insertEmp(String name, String ssn, String birDate,
@@ -155,32 +160,43 @@ public class CompanyDBController {
         }
     }
 
-    public String getResult(ResultSet resultSet) throws SQLException {
-        ResultSetMetaData rsmd = resultSet.getMetaData();
-        String result = "";
-        while(resultSet.next()) {
-            for(int i = 1; i <= rsmd.getColumnCount(); i++) {
-                result += resultSet.getString(i) + " ";
+    public String getResult(ResultSet resultSet) {
+        try {
+            ResultSetMetaData rsmd = resultSet.getMetaData();
+            String result = "";
+            while(resultSet.next()) {
+                for(int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    result += resultSet.getString(i) + " ";
+                }
+                result += "\n";
             }
-            result += "\n";
-        }
-        return result;
+
+            return result;
+        } catch(Exception e) {return "Error";}
+        
+        
     }
 
-    public String[] getStringSet(ResultSet resultSet) throws SQLException {
-        ResultSetMetaData rsmd = resultSet.getMetaData();
-        ArrayList<String> array = new ArrayList<String>();
-        
-        while(resultSet.next()) {
-            String row = "";
-            for(int i = 1; i <= rsmd.getColumnCount(); i++) {
-                row = resultSet.getString(i) + " ";
+    public String[] getStringSet(ResultSet resultSet) {
+        String[] result = null;
+        try {
+            ResultSetMetaData rsmd = resultSet.getMetaData();
+            ArrayList<String> array = new ArrayList<String>();
+            
+            while(resultSet.next()) {
+                String row = "";
+                for(int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    row = resultSet.getString(i) + " ";
+                }
+                array.add(row);
             }
-            array.add(row);
+
+            result = array.toArray(new String[0]);
+
+            
+        } catch(Exception e) {
+            
         }
-
-        String[] result = array.toArray(new String[0]);
-
         return result;
     }
 
@@ -190,7 +206,7 @@ public class CompanyDBController {
 
             int[] checked = {1,0,0,1,1,1,1,1,1,1};
 
-            System.out.println(Arrays.toString(cont.getStringSet(cont.selectEmp(checked))));
+            System.out.println(cont.getResult(cont.selectEmp(checked)));
 
             cont.deconnectDB();
         } catch(Exception e) {
