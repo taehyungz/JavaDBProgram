@@ -44,25 +44,19 @@ public class CompanyDBController {
     }
     // 부서 선택, 애트리뷰트 선택, 조건 선택
     public ResultSet selectEmp(int[] checked) {
-        String[] attrName = {"EFname", "EMinit", "ELname", "ESsn",
-                             "EBdate", "EAddress", "ESex", "ESalary",
-                             "Fname, Minit, Lname", "Dname"};
+        String[] attrName = {"E.Fname", "E.Minit", "E.Lname", "E.Ssn", "E.Bdate", "E.Address", "E.Sex", "E.Salary",
+                             "CONCAT(S.fname,' ',S.Minit,' ',S.Fname) AS Super_name", "Dname"};
         String stmt = "SELECT ";
         for(int i = 0; i < checked.length; i++) {
             if(checked[i] == 1) {
                 stmt += attrName[i] + ", ";
             }
         }
-        
-        
         stmt = stmt.substring(0,stmt.length()-2);
-        stmt += " FROM (SELECT E.Fname AS EFname, E.Minit as EMinit, E.Lname as ELname, E.Ssn AS ESsn, " + 
-                "E.Bdate As EBdate, E.Address As EAddress, E.Sex AS Esex, E.Salary AS ESalary, " +
-                "S.Fname , S.Minit, S.Lname, E.dno FROM EMPLOYEE AS E " +
-                "LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn) AS A, DEPARTMENT";
-        stmt += " WHERE A.Dno = Dnumber;";
+        
+        stmt += " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
+                " JOIN DEPARTMENT ON E.Dno = Dnumber";
 
-        System.out.println(stmt);
         try {
             PreparedStatement p = conn.prepareStatement(stmt);
 
@@ -202,7 +196,7 @@ public class CompanyDBController {
 
     public static void main(String[] args) {
         try {
-            CompanyDBController cont = new CompanyDBController("root", "2357ljhmsql@@", "company");
+            CompanyDBController cont = new CompanyDBController("!", "@", "#");
 
             int[] checked = {1,0,0,1,1,1,1,1,1,1};
 

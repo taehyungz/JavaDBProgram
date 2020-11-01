@@ -11,6 +11,7 @@ import javax.swing.JComboBox;
 public class Panels extends JPanel{
 	String tableName = "";
 	String[] Columns = {};
+	CompanyDBController cont = new CompanyDBController("root","mysqlroot","company");
 }
 
 class NorthPanel extends Panels {
@@ -30,7 +31,6 @@ class OptionPanel extends Panels {
 	int[] checkValues = new int[10];
 //	int tableNumber = 0;
 	JCheckBox[] checkBoxes = new JCheckBox[10];
-	CompanyDBController cont = new CompanyDBController("!","@","#");
 
 	public OptionPanel() {
 		try {
@@ -140,6 +140,7 @@ class BottomPanel extends Panels {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			//cont.deleteEmp(ssn);
 			System.out.println("push button!");
 		}
 	}
