@@ -202,6 +202,7 @@ class BottomPanel extends Panels { // KTH + LJH
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			//cont.deleteEmp(ssn);
 			System.out.println("push button!");
 		}
 	}
