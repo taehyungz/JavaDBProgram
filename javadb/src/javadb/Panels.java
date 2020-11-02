@@ -11,7 +11,7 @@ import javax.swing.JComboBox;
 public class Panels extends JPanel{ // KTH
 	String tableName = "";
 	String[] Columns = {};
-	CompanyDBController cont = new CompanyDBController("root","elqltndjq","COMPANY");
+	CompanyDBController cont = new CompanyDBController("!","@","#");
 }
 
 class OptionPanel extends Panels { // KTH + PHJ
@@ -21,7 +21,6 @@ class OptionPanel extends Panels { // KTH + PHJ
 	int[] checkValues = new int[10];
 //	int tableNumber = 0;
 	JCheckBox[] checkBoxes = new JCheckBox[10];
-	//CompanyDBController cont = new CompanyDBController("root","elqltndjq","COMPANY");
 
 	public OptionPanel() {
 		try {
@@ -70,7 +69,7 @@ class OptionPanel extends Panels { // KTH + PHJ
 //		
 //	}
 //	
-	class myItemListener implements ItemListener{ // KTH
+	class myItemListener implements ItemListener{ // KTH + PHJ
 		int num = 0;
 		public myItemListener(int i) {
 			this.num = i;
@@ -110,17 +109,17 @@ class ResultPanel extends Panels { // KTH
 	}
 }
 
-class BottomPanel extends Panels { // KTH + LSW
+class BottomPanel extends Panels { // KTH + LJH
 	JPanel updateNewPanel = new JPanel(); // KTH
 	JPanel updatePanel = new JPanel(); // KTH
-	JPanel removePanel = new JPanel(); // LSW
+	JPanel removePanel = new JPanel(); // LJH
 	int selectedPersonNum = 0;
 	JTextField newSalInp = new JTextField(10);
 	double newSalary = 0;
 	String[] selectedNames = {"사람1", "사람2"};
 	String[] selectedSSNs = {"123","456"};
 
-	public BottomPanel() {
+	public BottomPanel() { // KTH + LJH
 		setLayout(new BorderLayout());
 		updatePanel.setLayout(new BorderLayout());
 		
@@ -175,7 +174,7 @@ class BottomPanel extends Panels { // KTH + LSW
 		
 	}
 
-	class myButtonListener implements ActionListener { // LSW
+	class myButtonListener implements ActionListener { // LJH
 		public myButtonListener() {}
 
 		@Override
