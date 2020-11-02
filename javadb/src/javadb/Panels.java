@@ -11,8 +11,7 @@ import javax.swing.JComboBox;
 public class Panels extends JPanel{ // KTH
 	String tableName = "";
 	String[] Columns = {};
-
-	CompanyDBController cont = new CompanyDBController("!","@","#");
+	CompanyDBController cont = new CompanyDBController("root","elqltndjq","COMPANY");
 }
 
 class OptionPanel extends Panels { // KTH + PHJ
@@ -22,6 +21,7 @@ class OptionPanel extends Panels { // KTH + PHJ
 	int[] checkValues = new int[10];
 //	int tableNumber = 0;
 	JCheckBox[] checkBoxes = new JCheckBox[10];
+	//CompanyDBController cont = new CompanyDBController("root","elqltndjq","COMPANY");
 
 	public OptionPanel() {
 		try {
@@ -70,7 +70,7 @@ class OptionPanel extends Panels { // KTH + PHJ
 //		
 //	}
 //	
-	class myItemListener implements ItemListener{ // KTH + PHJ
+	class myItemListener implements ItemListener{ // KTH
 		int num = 0;
 		public myItemListener(int i) {
 			this.num = i;
@@ -98,7 +98,7 @@ class OptionPanel extends Panels { // KTH + PHJ
 	}
 }
 
-class ResultPanel extends Panels { // KTH
+class ResultPanel extends Panels { // LSW
 	public ResultPanel() {
 		setBackground(Color.WHITE);
 		add(new JLabel("result "));
@@ -110,17 +110,17 @@ class ResultPanel extends Panels { // KTH
 	}
 }
 
-class BottomPanel extends Panels { // KTH + LJH
+class BottomPanel extends Panels { // KTH + LSW
 	JPanel updateNewPanel = new JPanel(); // KTH
 	JPanel updatePanel = new JPanel(); // KTH
-	JPanel removePanel = new JPanel(); // LJH
+	JPanel removePanel = new JPanel(); // LSW
 	int selectedPersonNum = 0;
 	JTextField newSalInp = new JTextField(10);
 	double newSalary = 0;
 	String[] selectedNames = {"사람1", "사람2"};
 	String[] selectedSSNs = {"123","456"};
 
-	public BottomPanel() { // KTH + LJH
+	public BottomPanel() {
 		setLayout(new BorderLayout());
 		updatePanel.setLayout(new BorderLayout());
 		
@@ -175,7 +175,7 @@ class BottomPanel extends Panels { // KTH + LJH
 		
 	}
 
-	class myButtonListener implements ActionListener { // LJH
+	class myButtonListener implements ActionListener { // LSW
 		public myButtonListener() {}
 
 		@Override
