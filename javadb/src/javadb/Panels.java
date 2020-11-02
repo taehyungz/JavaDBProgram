@@ -8,29 +8,20 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 	
-public class Panels extends JPanel{
+public class Panels extends JPanel{ // KTH
 	String tableName = "";
 	String[] Columns = {};
+	CompanyDBController cont = new CompanyDBController("root","elqltndjq","COMPANY");
 }
 
-class NorthPanel extends Panels {
-	public NorthPanel() {
-		setBackground(Color.BLACK);
-		setLayout(new FlowLayout());
-		JLabel teamName = new JLabel("DB 8주차 4조");
-		teamName.setForeground(Color.WHITE);
-		add(teamName);
-	}
-}
-
-class OptionPanel extends Panels {
+class OptionPanel extends Panels { // KTH + PHJ
 	JPanel tableSelectPanel = new JPanel();
 	JPanel columnSelectPanel = new JPanel();
 	JPanel rightPanel = new JPanel();
 	int[] checkValues = new int[10];
 //	int tableNumber = 0;
 	JCheckBox[] checkBoxes = new JCheckBox[10];
-	CompanyDBController cont = new CompanyDBController("!","@","#");
+	//CompanyDBController cont = new CompanyDBController("root","elqltndjq","COMPANY");
 
 	public OptionPanel() {
 		try {
@@ -79,7 +70,7 @@ class OptionPanel extends Panels {
 //		
 //	}
 //	
-	class myItemListener implements ItemListener{
+	class myItemListener implements ItemListener{ // KTH
 		int num = 0;
 		public myItemListener(int i) {
 			this.num = i;
@@ -94,7 +85,7 @@ class OptionPanel extends Panels {
 		}
 	}
 	
-	class mySelectListener implements ActionListener{
+	class mySelectListener implements ActionListener{ // KTH
 		public mySelectListener() {
 			
 		}
@@ -107,7 +98,7 @@ class OptionPanel extends Panels {
 	}
 }
 
-class ResultPanel extends Panels {
+class ResultPanel extends Panels { // LSW
 	public ResultPanel() {
 		setBackground(Color.WHITE);
 		add(new JLabel("result "));
@@ -119,11 +110,35 @@ class ResultPanel extends Panels {
 	}
 }
 
-class BottomPanel extends Panels {
-	JPanel removePanel = new JPanel();
+class BottomPanel extends Panels { // KTH + LSW
+	JPanel updateNewPanel = new JPanel(); // KTH
+	JPanel updatePanel = new JPanel(); // KTH
+	JPanel removePanel = new JPanel(); // LSW
+	int selectedPersonNum = 0;
+	JTextField newSalInp = new JTextField(10);
+	double newSalary = 0;
+	String[] selectedNames = {"사람1", "사람2"};
+	String[] selectedSSNs = {"123","456"};
 
 	public BottomPanel() {
 		setLayout(new BorderLayout());
+		updatePanel.setLayout(new BorderLayout());
+		
+		JLabel totalPersonLabel = new JLabel("  인원 수 : "+selectedPersonNum);
+		updatePanel.add(totalPersonLabel, BorderLayout.NORTH);
+		JLabel updateLabel = new JLabel("  선택한 직원 : " + Arrays.toString(selectedNames));
+		updatePanel.add(updateLabel, BorderLayout.CENTER);
+		
+		JLabel newSalLabel = new JLabel("새로운 Salary : ");
+		updateNewPanel.add(newSalLabel);
+		
+		updateNewPanel.add(newSalInp);
+		JButton updateBT = new JButton("수정하기");
+		updateBT.addActionListener(new myUpdateListener());
+		updateNewPanel.add(updateBT);
+		
+		updatePanel.add(updateNewPanel, BorderLayout.SOUTH);
+		add(updatePanel, BorderLayout.WEST);
 
 		JLabel removeLabel = new JLabel("선택한 데이터 삭제");
 		removePanel.add(removeLabel);
@@ -134,8 +149,33 @@ class BottomPanel extends Panels {
 
 		add(removePanel, BorderLayout.EAST);
 	}
+	
+	class myUpdateListener implements ActionListener{ // KTH
+		public myUpdateListener() { }
 
-	class myButtonListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try{
+				newSalary = Double.parseDouble(newSalInp.getText());
+			} catch(Exception nullInput) {
+				newSalary = 0;
+			}
+			
+			for(int i=0;i<selectedSSNs.length;i++) {
+				System.out.println(selectedSSNs[i]);
+				try {
+					cont.updateEmp(selectedSSNs[i], newSalary);
+				} catch(Exception notUpdated) {
+					System.out.println("수정되지 않았습니다.");
+				}
+			}
+			System.out.println(newSalInp.getText());
+		}
+		
+		
+	}
+
+	class myButtonListener implements ActionListener { // LSW
 		public myButtonListener() {}
 
 		@Override

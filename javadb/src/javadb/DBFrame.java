@@ -11,7 +11,7 @@ import java.awt.GridLayout;
 
 import java.io.*;
 
-public class DBFrame extends JFrame{
+public class DBFrame extends JFrame{ // KTH
 	public DBFrame(){
 		// Frame을 생성
 		this.setTitle("Java DB Program");
