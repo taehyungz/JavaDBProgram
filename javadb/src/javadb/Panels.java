@@ -2,6 +2,9 @@ package javadb;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.Arrays;
 
 import javax.swing.JButton;
@@ -11,7 +14,27 @@ import javax.swing.JComboBox;
 public class Panels extends JPanel{ // KTH
 	String tableName = "";
 	String[] Columns = {};
-	CompanyDBController cont = new CompanyDBController("!","@","#");
+	String path = System.getProperty("user.dir");
+	String id = "";
+	String password="";
+	String dbname="";
+	CompanyDBController cont = null;
+	public Panels() {
+		try {
+			File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
+			FileReader filereader = new FileReader(file);
+			BufferedReader bufReader = new BufferedReader(filereader);
+			String id = bufReader.readLine();
+			String password = bufReader.readLine();
+			String dbname = bufReader.readLine();
+			cont = new CompanyDBController(id, password, dbname);
+			
+		} catch(Exception errDBInfo) {
+			String id = "!";
+			String password = "@";
+			String dbname = "#";
+		}
+	}
 }
 
 class OptionPanel extends Panels { // KTH + PHJ
