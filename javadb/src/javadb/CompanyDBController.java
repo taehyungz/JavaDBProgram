@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.io.*;
 
-public class CompanyDBController { // LSW
+
+public class CompanyDBController { // LJH
     private Connection conn = null;
     private String sqlID = null;
     private String sqlPw = null;
