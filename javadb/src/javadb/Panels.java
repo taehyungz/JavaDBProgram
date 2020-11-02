@@ -11,6 +11,7 @@ import javax.swing.JComboBox;
 public class Panels extends JPanel{ // KTH
 	String tableName = "";
 	String[] Columns = {};
+
 	CompanyDBController cont = new CompanyDBController("!","@","#");
 }
 
