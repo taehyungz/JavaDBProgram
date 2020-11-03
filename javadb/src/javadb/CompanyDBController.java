@@ -68,11 +68,10 @@ public class CompanyDBController { // LJH
     }
 
     public ResultSet selectSsn() {
-        String stmt = "SELECT CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME, SSN" +
-                        "FROM EMPLOYEE";
+        String stmt = "SELECT CONCAT(Fname,' ',Minit,' ',Lname) AS NAME, SSN FROM EMPLOYEE;";
+        System.out.println(stmt);
         try {
             PreparedStatement p = conn.prepareStatement(stmt);
-
             return p.executeQuery();
         } catch(Exception e) {
             return null;

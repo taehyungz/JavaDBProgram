@@ -15,6 +15,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
+interface BottomInterface {
+	public void updateNameList(String nameList);
+} 
 	
 public class Panels extends JPanel{ // KTH
 	String tableName = "";
@@ -77,7 +81,7 @@ class OptionPanel extends Panels { // KTH + PHJ
 	BottomPanel bottomPanel;
 
 	public OptionPanel(JFrame jf) {
-		bottomPanel = new BottomPanel(this);
+		bottomPanel = new BottomPanel();
 		jf.add(bottomPanel, BorderLayout.SOUTH);
 		try {
 			searchQuery();
@@ -148,6 +152,9 @@ class OptionPanel extends Panels { // KTH + PHJ
 
 	public void searchQuery (){
 		try{
+			updateNameList();
+			
+			System.out.println("I'm in");
 			int colCount = 0;
 
 			contentsArrayList.clear();
@@ -177,7 +184,6 @@ class OptionPanel extends Panels { // KTH + PHJ
 			for (int n = 0; n<rowSize; n++){
 				contents[n] = contentsArrayList.get(n);
 			}
-			System.out.println("debug::: in Option1");
 
 			String colsName = "CheckBox ";
 
@@ -192,17 +198,23 @@ class OptionPanel extends Panels { // KTH + PHJ
 			defaultTableModel.setDataVector(contents,colsArr);
 
 			ResultSet pidResult = cont.selectSsn();
-
+			
 			pidList.clear();
 			checkList.clear();
 
 			while(pidResult.next()){
+				System.out.println("O*##");
 				ArrayList<String> pidSet = new ArrayList<>();
-				for(int i=0; i<2; i++){
+				for(int i=1; i<3; i++){
+					System.out.println(i);
 					pidSet.add(pidResult.getString(i));
+					System.out.println(pidResult.getString(i));
 				}
+				System.out.println(pidSet);
 				pidList.add(pidSet);
 			}
+			
+			System.out.println(pidList);
 		
 		} catch(Exception sqle) {
 			
@@ -218,8 +230,26 @@ class OptionPanel extends Panels { // KTH + PHJ
 			System.out.println("checkbox : "+Arrays.toString(checkValues));
 			System.out.println("쿼리문을 실행합니다.");
 			searchQuery ();
-			
+			updateNameList();
 		}
+	}
+	
+	public void updateNameList() {
+
+		String nameList = "선택한 직원  :  ";
+		System.out.println(checkList);
+		System.out.println(pidList);
+		
+		for(int i=0; i<checkList.size(); i++){
+			System.out.println(i);
+			if(i!=checkList.size()-1){
+				nameList = nameList + pidList.get(checkList.get(i)).get(0)+"  /  ";
+			}else{
+				nameList = nameList + pidList.get(checkList.get(i)).get(0);
+			}
+			System.out.println(nameList);
+		}
+		bottomPanel.updateNameList(nameList);
 	}
 
 	class MyTableCellRenderer extends DefaultTableCellRenderer {
@@ -232,7 +262,7 @@ class OptionPanel extends Panels { // KTH + PHJ
 			comp.setSelected((value!=null && ((Boolean)value).booleanValue()));
 			if((value!=null && ((Boolean)value).booleanValue())){
 				if(!checkList.contains((Integer)row)){
-					checkList.add((Integer)row)					;
+					checkList.add((Integer)row);
 					updateNameList();
 				}
 			}else{
@@ -244,23 +274,10 @@ class OptionPanel extends Panels { // KTH + PHJ
 			return comp;
 		}
 
-		private void updateNameList() {
-
-			String nameList = "선택한 직원  :  ";
-			for(int i=0; i<checkList.size(); i++){
-				if(i!=checkList.size()-1){
-					nameList = nameList + pidList.get(checkList.get(i))+"  /  ";
-				}else{
-					nameList = nameList + pidList.get(checkList.get(i));
-				}
-			}
-
-			bottomPanel.updateLabel.setText(nameList);
-		}
 	}
 }
 
-class BottomPanel extends Panels { // KTH + LJH
+class BottomPanel extends Panels implements BottomInterface{ // KTH + LJH
 	JPanel updateNewPanel = new JPanel(); // KTH
 	JPanel updatePanel = new JPanel(); // KTH
 	JPanel removePanel = new JPanel(); // LJH
@@ -270,7 +287,7 @@ class BottomPanel extends Panels { // KTH + LJH
 	double newSalary = 0;
 	String[] selectedSSNs = {"123","456"};
 
-	public BottomPanel(OptionPanel optionPanel) { // KTH + LJH
+	public BottomPanel() { // KTH + LJH
 		setLayout(new BorderLayout());
 		updatePanel.setLayout(new BorderLayout());
 		
@@ -341,5 +358,10 @@ class BottomPanel extends Panels { // KTH + LJH
 				}
 			}
 		}
+	}
+
+	@Override
+	public void updateNameList(String nameList) {
+		updateLabel.setText(nameList);
 	}
 }
