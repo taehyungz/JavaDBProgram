@@ -1,23 +1,30 @@
 package javadb;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 	
 public class Panels extends JPanel{ // KTH
 	String tableName = "";
-	String[] Columns = {};
+	String[] columnsDT = {};
 	String path = System.getProperty("user.dir");
 	String id = "";
 	String password="";
 	String dbname="";
+	String[] attrNames = null;
+
 	CompanyDBController cont = null;
 	public Panels() {
 		try {
@@ -29,6 +36,8 @@ public class Panels extends JPanel{ // KTH
 			String dbname = bufReader.readLine();
 			cont = new CompanyDBController(id, password, dbname);
 			
+			attrNames = cont.getAttrs();
+			
 		} catch(Exception errDBInfo) {
 			String id = "!";
 			String password = "@";
@@ -38,61 +47,90 @@ public class Panels extends JPanel{ // KTH
 }
 
 class OptionPanel extends Panels { // KTH + PHJ
-	JPanel tableSelectPanel = new JPanel();
-	JPanel columnSelectPanel = new JPanel();
-	JPanel rightPanel = new JPanel();
-	int[] checkValues = new int[10];
-//	int tableNumber = 0;
+	JPanel groupingPanel = new JPanel();
+	JPanel columnsDTselectPanel = new JPanel();
+	JPanel selBtnPanel = new JPanel();
+	int[] checkValues = {1,1,1,1,1,1,1,1};//new int[10];
 	JCheckBox[] checkBoxes = new JCheckBox[10];
+	String[] colsArr = null;
+	Object[] contentRow;
+	Object[][] contents;
+	ArrayList<Object[]> contentsArrayList = new ArrayList<Object[]>();
+	JScrollPane scrollPanel = null;
+	DefaultTableModel defaultTableModel = new DefaultTableModel(contents, colsArr);
 
-	public OptionPanel() {
+	//check list and person ArrayList
+	ArrayList<Integer> checkList = new ArrayList<Integer>();
+	ArrayList<ArrayList<String>> pidList = new ArrayList<ArrayList<String>>();
+
+	JTable table = new JTable(defaultTableModel){
+		@Override 
+		public Class getColumnClass(int column){
+			if(column==0){
+				return Boolean.class;
+			}else {
+				return Object.class;
+			}
+		}
+	};
+
+	BottomPanel bottomPanel;
+
+	public OptionPanel(JFrame jf) {
+		bottomPanel = new BottomPanel(this);
+		jf.add(bottomPanel, BorderLayout.SOUTH);
 		try {
+			searchQuery();
+			
+			DefaultTableCellRenderer dcr = new MyTableCellRenderer();
+			DefaultTableCellRenderer defaultDcr = new DefaultTableCellRenderer();
+
+			table.getColumn("CheckBox").setPreferredWidth(15);
+
+			dcr.setHorizontalAlignment(SwingConstants.CENTER);
+			defaultDcr.setHorizontalAlignment(SwingConstants.CENTER);
+			
+			table.getColumn("CheckBox").setCellRenderer(dcr);
+
+			for (int i=1; i<table.getColumnCount(); i++){
+				String name = table.getColumnName(i);
+				table.getColumn(name).setCellRenderer(defaultDcr);
+			}
+
+			scrollPanel = new JScrollPane(table);
+			
+			scrollPanel.setPreferredSize(new Dimension(1180,600));//(1000,600);
+			
+			jf.add(scrollPanel,BorderLayout.CENTER);
+
 			setLayout(new BorderLayout());
 			
 			JLabel teamName = new JLabel("직원 정보 검색 시스템");
-			tableSelectPanel.add(teamName);
-			
-			//String[] tableNames = cont.getStringSet(cont.getTables());
-			
-			//JComboBox tableNameCB = new JComboBox(tableNames);
-			//tableNameCB.addActionListener(new myCBListener());
-			//tableSelectPanel.add(tableNameCB);
-			//super.tableName에 넣기
+			groupingPanel.add(teamName);
 
-			String[] attrNames = cont.getAttrs("EMPLOYEE");
 			JLabel startAttr = new JLabel("Select Attributes");
-			columnSelectPanel.add(startAttr);
+			columnsDTselectPanel.add(startAttr);
 			
 			for(int i=0;i<attrNames.length;i++) {
-				checkBoxes[i] = new JCheckBox(attrNames[i], false);
-				columnSelectPanel.add(checkBoxes[i]);
+				checkBoxes[i] = new JCheckBox(attrNames[i], true);
+				columnsDTselectPanel.add(checkBoxes[i]);
 				checkBoxes[i].addItemListener(new myItemListener(i));
 			}
 
 			JButton selectButton = new JButton("검색하기");
 			selectButton.addActionListener(new mySelectListener());
-			rightPanel.add(selectButton);
+			selBtnPanel.add(selectButton);
 
-			add(tableSelectPanel,BorderLayout.WEST);
-			add(columnSelectPanel,BorderLayout.CENTER);
-			add(rightPanel,BorderLayout.EAST);
+			add(groupingPanel,BorderLayout.WEST);
+			add(columnsDTselectPanel,BorderLayout.CENTER);
+			add(selBtnPanel,BorderLayout.EAST);
 		} catch(Exception e) {
 			
 		}
 	}
-//	
-//	class myCBListener implements ActionListener{
-//		@Override
-//		public void actionPerformed(ActionEvent e) {
-//			JComboBox cb = (JComboBox) e.getSource();
-//			tableNumber = cb.getSelectedIndex();
-//			//db안의 몇 번째 테이블인지를 반환
-//			//System.out.println(tableNumber);
-//		}
-//		
-//	}
-//	
-	class myItemListener implements ItemListener{ // KTH + PHJ
+
+
+	class myItemListener implements ItemListener { // KTH + PHJ
 		int num = 0;
 		public myItemListener(int i) {
 			this.num = i;
@@ -104,6 +142,70 @@ class OptionPanel extends Panels { // KTH + PHJ
 			else
 				select = 0;
 			checkValues[num] = select;
+			System.out.println(Arrays.toString(checkValues));
+		}
+	}
+
+	public void searchQuery (){
+		try{
+			int colCount = 0;
+
+			contentsArrayList.clear();
+
+			ResultSet result = cont.selectEmp(checkValues);
+			for(int j=0; j<checkValues.length; j++){
+				if(checkValues[j]==1){
+					colCount = colCount+1;
+				}
+			}
+			
+			while(result.next()){
+				contentRow = new Object[colCount+1];
+				contentRow[0] = false;
+				for(int k=1; k<colCount+1;k++){
+					contentRow[k] = (result.getString(k));
+				}
+				contentsArrayList.add(contentRow);
+			}
+
+			System.out.println(contentsArrayList);
+
+			int colSize = colCount;
+			int rowSize = contentsArrayList.size();
+
+			contents = new Object[contentsArrayList.size()][colCount];
+			for (int n = 0; n<rowSize; n++){
+				contents[n] = contentsArrayList.get(n);
+			}
+			System.out.println("debug::: in Option1");
+
+			String colsName = "CheckBox ";
+
+			for(int n=0;n<checkValues.length;n++) {
+				if(checkValues[n]==1 && n!=0) 
+					colsName+=(" "+attrNames[n]);
+				else if(checkValues[n]==1 && n<colSize)
+					colsName+=attrNames[n];
+			}
+			colsArr = colsName.split(" ");
+
+			defaultTableModel.setDataVector(contents,colsArr);
+
+			ResultSet pidResult = cont.selectSsn();
+
+			pidList.clear();
+			checkList.clear();
+
+			while(pidResult.next()){
+				ArrayList<String> pidSet = new ArrayList<>();
+				for(int i=0; i<2; i++){
+					pidSet.add(pidResult.getString(i));
+				}
+				pidList.add(pidSet);
+			}
+		
+		} catch(Exception sqle) {
+			
 		}
 	}
 	
@@ -115,20 +217,46 @@ class OptionPanel extends Panels { // KTH + PHJ
 		public void actionPerformed(ActionEvent e) {
 			System.out.println("checkbox : "+Arrays.toString(checkValues));
 			System.out.println("쿼리문을 실행합니다.");
-			System.out.println(cont.getResult(cont.selectEmp(checkValues)));
+			searchQuery ();
+			
 		}
 	}
-}
 
-class ResultPanel extends Panels { // KTH
-	public ResultPanel() {
-		setBackground(Color.WHITE);
-		add(new JLabel("result "));
-		//results = getResult();
-		
-//		JScrollPane scrollPanel = new JScrollPane();
-//		JFrame upperFrame = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class,this);
-//		upperFrame.add(new JLabel("SDFJL"));
+	class MyTableCellRenderer extends DefaultTableCellRenderer {
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column){
+			JCheckBox comp = null;
+			comp = new JCheckBox();
+			comp.setHorizontalAlignment(SwingConstants.CENTER);
+			comp.setSelected((value!=null && ((Boolean)value).booleanValue()));
+			if((value!=null && ((Boolean)value).booleanValue())){
+				if(!checkList.contains((Integer)row)){
+					checkList.add((Integer)row)					;
+					updateNameList();
+				}
+			}else{
+				if(checkList.contains((Integer)row)){
+					checkList.remove((Integer)row);
+					updateNameList();
+				}
+			}
+			return comp;
+		}
+
+		private void updateNameList() {
+
+			String nameList = "선택한 직원  :  ";
+			for(int i=0; i<checkList.size(); i++){
+				if(i!=checkList.size()-1){
+					nameList = nameList + pidList.get(checkList.get(i))+"  /  ";
+				}else{
+					nameList = nameList + pidList.get(checkList.get(i));
+				}
+			}
+
+			bottomPanel.updateLabel.setText(nameList);
+		}
 	}
 }
 
@@ -137,18 +265,18 @@ class BottomPanel extends Panels { // KTH + LJH
 	JPanel updatePanel = new JPanel(); // KTH
 	JPanel removePanel = new JPanel(); // LJH
 	int selectedPersonNum = 0;
+	JLabel updateLabel;
 	JTextField newSalInp = new JTextField(10);
 	double newSalary = 0;
-	String[] selectedNames = {"사람1", "사람2"};
 	String[] selectedSSNs = {"123","456"};
 
-	public BottomPanel() { // KTH + LJH
+	public BottomPanel(OptionPanel optionPanel) { // KTH + LJH
 		setLayout(new BorderLayout());
 		updatePanel.setLayout(new BorderLayout());
 		
 		JLabel totalPersonLabel = new JLabel("  인원 수 : "+selectedPersonNum);
 		updatePanel.add(totalPersonLabel, BorderLayout.NORTH);
-		JLabel updateLabel = new JLabel("  선택한 직원 : " + Arrays.toString(selectedNames));
+		updateLabel = new JLabel("  선택한 직원 : " );
 		updatePanel.add(updateLabel, BorderLayout.CENTER);
 		
 		JLabel newSalLabel = new JLabel("새로운 Salary : ");
@@ -183,10 +311,10 @@ class BottomPanel extends Panels { // KTH + LJH
 				newSalary = 0;
 			}
 			
-			for(int i=0;i<selectedSSNs.length;i++) {
-				System.out.println(selectedSSNs[i]);
+			for(int m=0;m<selectedSSNs.length;m++) {
+				System.out.println(selectedSSNs[m]);
 				try {
-					cont.updateEmp(selectedSSNs[i], newSalary);
+					cont.updateEmp(selectedSSNs[m], newSalary);
 				} catch(Exception notUpdated) {
 					System.out.println("수정되지 않았습니다.");
 				}
@@ -204,6 +332,14 @@ class BottomPanel extends Panels { // KTH + LJH
 		public void actionPerformed(ActionEvent e) {
 			//cont.deleteEmp(ssn);
 			System.out.println("push button!");
+			for(int m=0;m<selectedSSNs.length;m++) {
+				System.out.println(selectedSSNs[m]);
+				try {
+					cont.deleteEmp(selectedSSNs[m]);
+				} catch(Exception notUpdated) {
+					System.out.println("삭제되지 않았습니다.");
+				}
+			}
 		}
 	}
 }

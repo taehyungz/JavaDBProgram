@@ -44,19 +44,32 @@ public class CompanyDBController { // LJH
     }
     // 부서 선택, 애트리뷰트 선택, 조건 선택
     public ResultSet selectEmp(int[] checked) {
-        String[] attrName = {"E.Fname", "E.Minit", "E.Lname", "E.Ssn", "E.Bdate", "E.Address", "E.Sex", "E.Salary",
-                             "CONCAT(S.fname,' ',S.Minit,' ',S.Fname) AS Super_name", "Dname"};
+        String[] attrName = {"CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME", "E.SSN", "E.BDATE", "E.ADDRESS", "E.SEX", "E.SALARY",
+                             "CONCAT(S.fname,' ',S.Minit,' ',S.Fname) AS SUPERVISOR", "Dname AS DEPARTMENT"};
         String stmt = "SELECT ";
         for(int i = 0; i < checked.length; i++) {
             if(checked[i] == 1) {
                 stmt += attrName[i] + ", ";
             }
         }
+
         stmt = stmt.substring(0,stmt.length()-2);
         
         stmt += " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
                 " JOIN DEPARTMENT ON E.Dno = Dnumber";
 
+        try {
+            PreparedStatement p = conn.prepareStatement(stmt);
+
+            return p.executeQuery();
+        } catch(Exception e) {
+            return null;
+        }
+    }
+
+    public ResultSet selectSsn() {
+        String stmt = "SELECT CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME, SSN" +
+                        "FROM EMPLOYEE";
         try {
             PreparedStatement p = conn.prepareStatement(stmt);
 
@@ -96,8 +109,11 @@ public class CompanyDBController { // LJH
         }
     }
 
-    public String[] getAttrs(String tableName) throws SQLException {
-        String stmt = "SELECT * FROM "+ tableName +";";
+    public String[] getAttrs() throws SQLException {
+        String stmt = "SELECT CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME, E.SSN, E.BDATE, E.ADDRESS, E.SEX," +
+                        " E.SALARY, CONCAT(S.fname,' ',S.Minit,' ',S.Fname) AS SUPERVISIOR, Dname AS DEPARTMENT" + 
+                        " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
+                        " JOIN DEPARTMENT ON E.Dno = Dnumber";
         PreparedStatement p = conn.prepareStatement(stmt);
 
         ResultSet r = p.executeQuery();
@@ -192,6 +208,15 @@ public class CompanyDBController { // LJH
             
         }
         return result;
+    }
+
+    public String[][] getTuples(ResultSet r) {
+        try {
+            ResultSetMetaData rsmd = r.getMetaData();
+            
+        } catch(SQLException sqle) {}
+
+        return null;
     }
 
     public static void main(String[] args) {
