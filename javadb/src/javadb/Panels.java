@@ -16,8 +16,12 @@ import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-interface BottomInterface {
-	public void updateNameList(String nameList);
+interface totalInterface {
+	JButton selectButton = new JButton("검색하기");
+	JLabel updateLabel = new JLabel("   검색한 직원  : " );
+	JLabel totalPersonLabel = new JLabel("  인원 수  : ");
+//	public void updateCount(int count);
+//	public void updateNameList(String nameList);
 } 
 	
 public class Panels extends JPanel{ // KTH
@@ -50,7 +54,7 @@ public class Panels extends JPanel{ // KTH
 	}
 }
 
-class OptionPanel extends Panels { // KTH + PHJ
+class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 	JPanel groupingPanel = new JPanel();
 	JPanel columnsDTselectPanel = new JPanel();
 	JPanel selBtnPanel = new JPanel();
@@ -78,28 +82,10 @@ class OptionPanel extends Panels { // KTH + PHJ
 		}
 	};
 
-	BottomPanel bottomPanel;
-
 	public OptionPanel(JFrame jf) {
-		bottomPanel = new BottomPanel();
-		jf.add(bottomPanel, BorderLayout.SOUTH);
+		
 		try {
 			searchQuery();
-			
-			DefaultTableCellRenderer dcr = new MyTableCellRenderer();
-			DefaultTableCellRenderer defaultDcr = new DefaultTableCellRenderer();
-
-			table.getColumn("CheckBox").setPreferredWidth(15);
-
-			dcr.setHorizontalAlignment(SwingConstants.CENTER);
-			defaultDcr.setHorizontalAlignment(SwingConstants.CENTER);
-			
-			table.getColumn("CheckBox").setCellRenderer(dcr);
-
-			for (int i=1; i<table.getColumnCount(); i++){
-				String name = table.getColumnName(i);
-				table.getColumn(name).setCellRenderer(defaultDcr);
-			}
 
 			scrollPanel = new JScrollPane(table);
 			
@@ -121,7 +107,6 @@ class OptionPanel extends Panels { // KTH + PHJ
 				checkBoxes[i].addItemListener(new myItemListener(i));
 			}
 
-			JButton selectButton = new JButton("검색하기");
 			selectButton.addActionListener(new mySelectListener());
 			selBtnPanel.add(selectButton);
 
@@ -179,7 +164,9 @@ class OptionPanel extends Panels { // KTH + PHJ
 
 			int colSize = colCount;
 			int rowSize = contentsArrayList.size();
-
+			
+			totalPersonLabel.setText("   검색한 직원  : "+rowSize+" 명");
+			
 			contents = new Object[contentsArrayList.size()][colCount];
 			for (int n = 0; n<rowSize; n++){
 				contents[n] = contentsArrayList.get(n);
@@ -203,7 +190,6 @@ class OptionPanel extends Panels { // KTH + PHJ
 			checkList.clear();
 
 			while(pidResult.next()){
-				System.out.println("O*##");
 				ArrayList<String> pidSet = new ArrayList<>();
 				for(int i=1; i<3; i++){
 					System.out.println(i);
@@ -215,6 +201,21 @@ class OptionPanel extends Panels { // KTH + PHJ
 			}
 			
 			System.out.println(pidList);
+			
+			DefaultTableCellRenderer dcr = new MyTableCellRenderer();
+			DefaultTableCellRenderer defaultDcr = new DefaultTableCellRenderer();
+
+			table.getColumn("CheckBox").setPreferredWidth(15);
+
+			dcr.setHorizontalAlignment(SwingConstants.CENTER);
+			defaultDcr.setHorizontalAlignment(SwingConstants.CENTER);
+			
+			table.getColumn("CheckBox").setCellRenderer(dcr);
+
+			for (int i=1; i<table.getColumnCount(); i++){
+				String name = table.getColumnName(i);
+				table.getColumn(name).setCellRenderer(defaultDcr);
+			}
 		
 		} catch(Exception sqle) {
 			
@@ -249,7 +250,7 @@ class OptionPanel extends Panels { // KTH + PHJ
 			}
 			System.out.println(nameList);
 		}
-		bottomPanel.updateNameList(nameList);
+		updateLabel.setText(nameList);
 	}
 
 	class MyTableCellRenderer extends DefaultTableCellRenderer {
@@ -275,28 +276,37 @@ class OptionPanel extends Panels { // KTH + PHJ
 		}
 
 	}
+
+//	@Override
+//	public void updateNameList(String nameList) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public void updateCount(int count) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 }
 
-class BottomPanel extends Panels implements BottomInterface{ // KTH + LJH
+class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 	JPanel updateNewPanel = new JPanel(); // KTH
 	JPanel updatePanel = new JPanel(); // KTH
 	JPanel removePanel = new JPanel(); // LJH
-	int selectedPersonNum = 0;
-	JLabel updateLabel;
 	JTextField newSalInp = new JTextField(10);
 	double newSalary = 0;
-	String[] selectedSSNs = {"123","456"};
 
 	public BottomPanel() { // KTH + LJH
 		setLayout(new BorderLayout());
 		updatePanel.setLayout(new BorderLayout());
 		
-		JLabel totalPersonLabel = new JLabel("  인원 수 : "+selectedPersonNum);
+		
 		updatePanel.add(totalPersonLabel, BorderLayout.NORTH);
-		updateLabel = new JLabel("  선택한 직원 : " );
 		updatePanel.add(updateLabel, BorderLayout.CENTER);
 		
 		JLabel newSalLabel = new JLabel("새로운 Salary : ");
+		newSalLabel.setBounds(20, 10, 100,30);
 		updateNewPanel.add(newSalLabel);
 		
 		updateNewPanel.add(newSalInp);
@@ -328,14 +338,14 @@ class BottomPanel extends Panels implements BottomInterface{ // KTH + LJH
 				newSalary = 0;
 			}
 			
-			for(int m=0;m<selectedSSNs.length;m++) {
-				System.out.println(selectedSSNs[m]);
-				try {
-					cont.updateEmp(selectedSSNs[m], newSalary);
-				} catch(Exception notUpdated) {
-					System.out.println("수정되지 않았습니다.");
-				}
-			}
+//			for(int m=0;m<selectedSSNs.length;m++) {
+//				System.out.println(selectedSSNs[m]);
+//				try {
+//					cont.updateEmp(selectedSSNs[m], newSalary);
+//				} catch(Exception notUpdated) {
+//					System.out.println("수정되지 않았습니다.");
+//				}
+//			}
 			System.out.println(newSalInp.getText());
 		}
 		
@@ -349,19 +359,26 @@ class BottomPanel extends Panels implements BottomInterface{ // KTH + LJH
 		public void actionPerformed(ActionEvent e) {
 			//cont.deleteEmp(ssn);
 			System.out.println("push button!");
-			for(int m=0;m<selectedSSNs.length;m++) {
-				System.out.println(selectedSSNs[m]);
-				try {
-					cont.deleteEmp(selectedSSNs[m]);
-				} catch(Exception notUpdated) {
-					System.out.println("삭제되지 않았습니다.");
-				}
-			}
+//			for(int m=0;m<selectedSSNs.length;m++) {
+//				System.out.println(selectedSSNs[m]);
+//				try {
+//					cont.deleteEmp(selectedSSNs[m]);
+//				} catch(Exception notUpdated) {
+//					System.out.println("삭제되지 않았습니다.");
+//				}
+//			}
 		}
 	}
 
-	@Override
-	public void updateNameList(String nameList) {
-		updateLabel.setText(nameList);
-	}
+//	@Override
+//	public void updateNameList(String nameList) {
+//		updateLabel.setText(nameList);
+//	}
+//
+//	@Override
+//	public void updateCount(int count) {
+//		// TODO Auto-generated method stub
+//		totalPersonLabel.setText("   검색한 직원  : "+count+" 명");
+//		
+//	}
 }

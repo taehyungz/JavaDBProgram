@@ -17,9 +17,9 @@ public class DBFrame extends JFrame{ // KTH
 		this.setTitle("Java DB Program");
 		
 		Container contentPane = getContentPane();
-		//BottomPanel bottomPanel = new BottomPanel();
+		BottomPanel bottomPanel = new BottomPanel();
 		OptionPanel optionPanel = new OptionPanel(this);
 		contentPane.add(optionPanel, BorderLayout.NORTH);
-		//contentPane.add(bottomPanel, BorderLayout.SOUTH);
+		contentPane.add(bottomPanel, BorderLayout.SOUTH);
 	}
 }
