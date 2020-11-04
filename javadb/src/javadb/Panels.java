@@ -3,9 +3,8 @@ package javadb;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,19 +43,16 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 	JPanel columnsDTselectPanel = new JPanel();
 	JPanel selBtnPanel = new JPanel();
 	int[] checkValues = {1,1,1,1,1,1,1,1};
-	JCheckBox[] checkBoxes = new JCheckBox[10];
+	JCheckBox[] checkBoxes = new JCheckBox[8];
 	String[] colsArr = null;
-	Object[] contentRow;
 	Object[][] contents;
-	ArrayList<Object[]> contentsArrayList = new ArrayList<Object[]>();
-	JScrollPane scrollPanel = null;
 	DefaultTableModel defaultTableModel = new DefaultTableModel(contents, colsArr);
 
 	//check list and person ArrayList
 	ArrayList<Integer> checkList = new ArrayList<Integer>();
 	ArrayList<ArrayList<String>> pidList = new ArrayList<ArrayList<String>>();
 
-	JTable table = new JTable(defaultTableModel){
+	JTable table = new JTable(defaultTableModel) {
 		@Override 
 		public Class getColumnClass(int column){
 			if(column==0){
@@ -66,18 +62,12 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			}
 		}
 	};
-
+	
 	public OptionPanel(JFrame jf) {
 		
 		try {
 			searchQuery();
 
-			scrollPanel = new JScrollPane(table);
-			
-			jf.add(scrollPanel,BorderLayout.CENTER);
-
-			setLayout(new BorderLayout());
-			
 			JLabel teamName = new JLabel("직원 정보 검색 시스템");
 			groupingPanel.add(teamName);
 
@@ -117,53 +107,26 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			System.out.println(Arrays.toString(checkValues));
 		}
 	}
+	
+	class mySelectListener implements ActionListener{ // KTH
+		public mySelectListener() {
+			
+		}
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			System.out.println("checkbox : "+Arrays.toString(checkValues));
+			System.out.println("쿼리문을 실행합니다.");
+			searchQuery ();
+			updateNameList();
+		}
+	}
 
-	public void searchQuery (){
+	private void searchQuery (){
 		try{
 			updateNameList();
 			
-			System.out.println("I'm in");
-			int colCount = 0;
-
-			contentsArrayList.clear();
-
-			ResultSet result = cont.selectEmp(checkValues);
-			for(int j=0; j<checkValues.length; j++){
-				if(checkValues[j]==1){
-					colCount = colCount+1;
-				}
-			}
-			
-			while(result.next()){
-				contentRow = new Object[colCount+1];
-				contentRow[0] = false;
-				for(int k=1; k<colCount+1;k++){
-					contentRow[k] = (result.getString(k));
-				}
-				contentsArrayList.add(contentRow);
-			}
-
-			System.out.println(contentsArrayList);
-
-			int colSize = colCount;
-			int rowSize = contentsArrayList.size();
-			
-			totalPersonLabel.setText("   검색한 직원  : "+rowSize+" 명");
-			
-			contents = new Object[contentsArrayList.size()][colCount];
-			for (int n = 0; n<rowSize; n++){
-				contents[n] = contentsArrayList.get(n);
-			}
-
-			String colsName = "CheckBox ";
-
-			for(int n=0;n<checkValues.length;n++) {
-				if(checkValues[n]==1 && n!=0) 
-					colsName+=(" "+attrNames[n]);
-				else if(checkValues[n]==1 && n<colSize)
-					colsName+=attrNames[n];
-			}
-			colsArr = colsName.split(" ");
+			colsArr = cont.getAttrsName(cont.selectEmp(checkValues));
+			contents = cont.getTuples(cont.selectEmp(checkValues));
 
 			defaultTableModel.setDataVector(contents,colsArr);
 
@@ -186,35 +149,12 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			System.out.println(pidList);
 			
 			DefaultTableCellRenderer dcr = new MyTableCellRenderer();
-			DefaultTableCellRenderer defaultDcr = new DefaultTableCellRenderer();
-
 			table.getColumn("CheckBox").setPreferredWidth(15);
-
 			dcr.setHorizontalAlignment(SwingConstants.CENTER);
-			defaultDcr.setHorizontalAlignment(SwingConstants.CENTER);
-			
 			table.getColumn("CheckBox").setCellRenderer(dcr);
-			
-			for (int i=1; i<table.getColumnCount(); i++){
-				String name = table.getColumnName(i);
-				table.getColumn(name).setCellRenderer(defaultDcr);
-			}
 		
 		} catch(Exception sqle) {
 			
-		}
-	}
-	
-	class mySelectListener implements ActionListener{ // KTH
-		public mySelectListener() {
-			
-		}
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			System.out.println("checkbox : "+Arrays.toString(checkValues));
-			System.out.println("쿼리문을 실행합니다.");
-			searchQuery ();
-			updateNameList();
 		}
 	}
 	
@@ -260,18 +200,6 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 		}
 
 	}
-
-//	@Override
-//	public void updateNameList(String nameList) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void updateCount(int count) {
-//		// TODO Auto-generated method stub
-//		
-//	}
 }
 
 class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
@@ -300,7 +228,7 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 		
 		updatePanel.add(updateNewPanel, BorderLayout.SOUTH);
 		add(updatePanel, BorderLayout.WEST);
-
+		
 		JLabel removeLabel = new JLabel("선택한 데이터 삭제");
 		removePanel.add(removeLabel);
 
@@ -353,16 +281,4 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 //			}
 		}
 	}
-
-//	@Override
-//	public void updateNameList(String nameList) {
-//		updateLabel.setText(nameList);
-//	}
-//
-//	@Override
-//	public void updateCount(int count) {
-//		// TODO Auto-generated method stub
-//		totalPersonLabel.setText("   검색한 직원  : "+count+" 명");
-//		
-//	}
 }

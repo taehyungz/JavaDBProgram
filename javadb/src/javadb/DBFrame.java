@@ -15,9 +15,11 @@ public class DBFrame extends JFrame{ // KTH
 		
 		Container contentPane = getContentPane();
 		OptionPanel optionPanel = new OptionPanel(this);
+		JScrollPane scrollPane = new JScrollPane(optionPanel.table);
 		BottomPanel bottomPanel = new BottomPanel();
 		
 		contentPane.add(optionPanel, BorderLayout.NORTH);
+		contentPane.add(scrollPane, BorderLayout.CENTER);
 		contentPane.add(bottomPanel, BorderLayout.SOUTH);
 	}
 }

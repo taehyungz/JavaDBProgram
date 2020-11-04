@@ -3,6 +3,7 @@ package javadb;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import java.io.*;
 
 public class CompanyDBController { // LJH
@@ -246,13 +247,14 @@ public class CompanyDBController { // LJH
         return result;
     }
 
-    public String[] getAttrs(ResultSet r) {
+    public String[] getAttrsName(ResultSet r) {
         try {
             ResultSetMetaData rsmd = r.getMetaData();
-            int colNum = rsmd.getColumnCount();
+            int colNum = rsmd.getColumnCount() + 1;
             String[] result = new String[colNum];
-            for(int i=0; i < result.length; i++) {
-                result[i] = rsmd.getColumnName(i+1);
+            result[0] = "CheckBox";
+            for(int i=1; i < result.length; i++) {
+                result[i] = rsmd.getColumnName(i);
             }
             return result;
         } catch(SQLException sqle) {
@@ -270,12 +272,13 @@ public class CompanyDBController { // LJH
                 rowNum = r.getRow();
                 r.beforeFirst();
             }
-            int colNum = rsmd.getColumnCount();
+            int colNum = rsmd.getColumnCount() + 1;
             Object[][] result = new Object[rowNum][colNum];
             int row = 0;
             while(r.next()) {
-                for(int col = 0; col < colNum; col++) {
-                    result[row][col] = r.getString(col+1);
+                result[row][0] = Boolean.FALSE;
+                for(int col = 1; col < colNum; col++) {
+                    result[row][col] = r.getString(col);
                 }
                 row++;
             }
@@ -297,7 +300,7 @@ public class CompanyDBController { // LJH
 
         //System.out.println(cont.getResult(cont.selectEmp(checked)));
 
-        System.out.println(Arrays.toString(cont.getAttrs(cont.selectEmp(checked))));
+        System.out.println(Arrays.toString(cont.getAttrsName(cont.selectEmp(checked))));
         Object[][] result = cont.getTuples(cont.selectEmp(checked));
         for(Object[] strArr : result) {
             System.out.println(Arrays.toString(strArr));
