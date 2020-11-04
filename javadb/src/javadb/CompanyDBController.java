@@ -3,6 +3,7 @@ package javadb;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import java.io.*;
 
 public class CompanyDBController { // LJH
@@ -10,17 +11,36 @@ public class CompanyDBController { // LJH
     private String sqlID = null;
     private String sqlPw = null;
 
+    public CompanyDBController(File f) {
+        try {
+            FileReader filereader = new FileReader(f);
+            BufferedReader bufReader = new BufferedReader(filereader);
+            sqlID = bufReader.readLine();
+            sqlPw = bufReader.readLine();
+            String dbname = bufReader.readLine();
+                
+            Class.forName("com.mysql.cj.jdbc.Driver"); //JDBC 드라이버 연결
+
+            this.connectDB(dbname);
+
+            bufReader.close();
+        } catch (ClassNotFoundException cnfe) {
+            cnfe.printStackTrace();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
+
     public CompanyDBController(final String sqlID, final String sqlPw, final String dbName) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver"); //JDBC 드라이버 연결
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
+
             this.sqlID = sqlID;
             this.sqlPw = sqlPw;
             this.connectDB(dbName);
-        } catch(Exception e) {}
+        } catch (ClassNotFoundException cnfe) {
+            cnfe.printStackTrace();
+        }
     }
 
     public boolean connectDB(final String dbName){
@@ -28,7 +48,8 @@ public class CompanyDBController { // LJH
             final String url = "jdbc:mysql://localhost:3306/"+dbName+"?serverTimezone=UTC";
             conn = DriverManager.getConnection(url, sqlID, sqlPw);
             return true;
-        } catch(SQLException e) {
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
             return false;
         }
     }
@@ -53,27 +74,35 @@ public class CompanyDBController { // LJH
             }
         }
 
-        stmt = stmt.substring(0,stmt.length()-2);
+        if(stmt.substring(stmt.length()-2,stmt.length()).equals(", ")) {
+            stmt = stmt.substring(0,stmt.length()-2);
+            stmt += " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
+                    " JOIN DEPARTMENT ON E.Dno = Dnumber";
+        } else {
+            stmt += "null";
+        }
         
-        stmt += " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
-                " JOIN DEPARTMENT ON E.Dno = Dnumber";
+        
 
         try {
-            PreparedStatement p = conn.prepareStatement(stmt);
+            PreparedStatement p =
+                conn.prepareStatement(stmt,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
 
             return p.executeQuery();
-        } catch(Exception e) {
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
             return null;
         }
     }
 
     public ResultSet selectSsn() {
         String stmt = "SELECT CONCAT(Fname,' ',Minit,' ',Lname) AS NAME, SSN FROM EMPLOYEE;";
-        System.out.println(stmt);
+ 
         try {
             PreparedStatement p = conn.prepareStatement(stmt);
             return p.executeQuery();
-        } catch(Exception e) {
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
             return null;
         }
     }
@@ -103,65 +132,75 @@ public class CompanyDBController { // LJH
         try {
             p.executeUpdate();
             return true;
-        } catch(SQLException e) {
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
             return false;
         }
     }
 
-    public String[] getAttrs() throws SQLException {
-        String stmt = "SELECT CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME, E.SSN, E.BDATE, E.ADDRESS, E.SEX," +
-                        " E.SALARY, CONCAT(S.fname,' ',S.Minit,' ',S.Fname) AS SUPERVISIOR, Dname AS DEPARTMENT" + 
-                        " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
-                        " JOIN DEPARTMENT ON E.Dno = Dnumber";
-        PreparedStatement p = conn.prepareStatement(stmt);
+    public String[] getAttrs() {
+        try {
+            String stmt = "SELECT CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME, E.SSN, E.BDATE, E.ADDRESS, E.SEX," +
+                            " E.SALARY, CONCAT(S.fname,' ',S.Minit,' ',S.Fname) AS SUPERVISIOR, Dname AS DEPARTMENT" + 
+                            " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
+                            " JOIN DEPARTMENT ON E.Dno = Dnumber";
+            PreparedStatement p = conn.prepareStatement(stmt);
 
-        ResultSet r = p.executeQuery();
-        ResultSetMetaData rsmd = r.getMetaData();
+            ResultSet r = p.executeQuery();
+            ResultSetMetaData rsmd = r.getMetaData();
 
-        ArrayList<String> array = new ArrayList<String>();
-        for(int i = 1; i <= rsmd.getColumnCount(); i++) {
-            array.add(rsmd.getColumnLabel(i));
+            ArrayList<String> array = new ArrayList<String>();
+            for(int i = 1; i <= rsmd.getColumnCount(); i++) {
+                array.add(rsmd.getColumnLabel(i));
+            }
+
+            String[] result = array.toArray(new String[0]);
+
+            return result;
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
+            return null;
         }
-
-        String[] result = array.toArray(new String[0]);
-
-        return result;
     }
 
-    public ResultSet getTables() throws SQLException {
-        String stmt = "Show tables;";
-        PreparedStatement p = conn.prepareStatement(stmt);
-        return p.executeQuery();
+    public ResultSet getTables() {
+        try {
+            String stmt = "Show tables;";
+            PreparedStatement p = conn.prepareStatement(stmt);
+            return p.executeQuery();
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
+            return null;
+        }
     }
 
     // 조건 선택
-    public boolean updateEmp(String ssn, double newSalary) throws SQLException {
+    public boolean updateEmp(String ssn, double newSalary) {
         String stmt = "UPDATE EMPLOYEE ";
         stmt += "SET Salary = ? ";
         stmt += "WHERE Ssn = ?;";
-
-        PreparedStatement p = conn.prepareStatement(stmt);
-        p.clearParameters();
-        p.setDouble(1, newSalary);
-        p.setString(2, ssn);
-        
         try {
+            PreparedStatement p = conn.prepareStatement(stmt);
+            p.clearParameters();
+            p.setDouble(1, newSalary);
+            p.setString(2, ssn);
+        
             p.executeUpdate();
             return true;
-        } catch(SQLException e) {
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
             return false;
         }
     }
 
-    public boolean deleteEmp(String ssn) throws SQLException {
+    public boolean deleteEmp(String ssn) {
         String stmt = "DELETE FROM EMPLOYEE ";
         stmt += "WHERE Ssn = ?;";
-
-        PreparedStatement p = conn.prepareStatement(stmt);
-        p.clearParameters();
-        p.setString(1, ssn);
-        
         try {
+            PreparedStatement p = conn.prepareStatement(stmt);
+            p.clearParameters();
+            p.setString(1, ssn);
+        
             p.executeUpdate();
             return true;
         } catch(SQLException e) {
@@ -181,9 +220,10 @@ public class CompanyDBController { // LJH
             }
 
             return result;
-        } catch(Exception e) {return "Error";}
-        
-        
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
+            return "Error";
+        }  
     }
 
     public String[] getStringSet(ResultSet resultSet) {
@@ -200,35 +240,72 @@ public class CompanyDBController { // LJH
                 array.add(row);
             }
 
-            result = array.toArray(new String[0]);
-
-            
-        } catch(Exception e) {
-            
+            result = array.toArray(new String[0]);          
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
         }
         return result;
     }
 
-    public String[][] getTuples(ResultSet r) {
+    public String[] getAttrsName(ResultSet r) {
         try {
             ResultSetMetaData rsmd = r.getMetaData();
-            
-        } catch(SQLException sqle) {}
+            int colNum = rsmd.getColumnCount() + 1;
+            String[] result = new String[colNum];
+            result[0] = "CheckBox";
+            for(int i=1; i < result.length; i++) {
+                result[i] = rsmd.getColumnName(i);
+            }
+            return result;
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
+            return null;
+        }
+        
+    }
 
-        return null;
+    public Object[][] getTuples(ResultSet r) {
+        try {
+            ResultSetMetaData rsmd = r.getMetaData();
+            int rowNum = 0;
+            if(r.last()) {
+                rowNum = r.getRow();
+                r.beforeFirst();
+            }
+            int colNum = rsmd.getColumnCount() + 1;
+            Object[][] result = new Object[rowNum][colNum];
+            int row = 0;
+            while(r.next()) {
+                result[row][0] = Boolean.FALSE;
+                for(int col = 1; col < colNum; col++) {
+                    result[row][col] = r.getString(col);
+                }
+                row++;
+            }
+            
+            return result;
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
+            return null;
+        }
     }
 
     public static void main(String[] args) {
-        try {
-            CompanyDBController cont = new CompanyDBController("!", "@", "#");
+        String path = System.getProperty("user.dir");
+        File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
+        CompanyDBController cont = new CompanyDBController(file);
 
-            int[] checked = {1,0,0,1,1,1,1,1,1,1};
+        int[] checked = {1,1,1,1,1,1,1,1};
+        //int[] checked = {0,0,0,0,0,0,0,0};
 
-            System.out.println(cont.getResult(cont.selectEmp(checked)));
+        //System.out.println(cont.getResult(cont.selectEmp(checked)));
 
-            cont.deconnectDB();
-        } catch(Exception e) {
-
+        System.out.println(Arrays.toString(cont.getAttrsName(cont.selectEmp(checked))));
+        Object[][] result = cont.getTuples(cont.selectEmp(checked));
+        for(Object[] strArr : result) {
+            System.out.println(Arrays.toString(strArr));
         }
+
+        cont.deconnectDB();
     }
 }
