@@ -127,7 +127,9 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			
 			colsArr = cont.getAttrsName(cont.selectEmp(checkValues));
 			contents = cont.getTuples(cont.selectEmp(checkValues));
-
+			
+			int rowSize = contents.length;
+			totalPersonLabel.setText("검색한 직원  : "+rowSize+" 명");
 			defaultTableModel.setDataVector(contents,colsArr);
 
 			ResultSet pidResult = cont.selectSsn();
@@ -162,6 +164,8 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			}
 		}
 		updateLabel.setText(nameList);
+		String[] x = totalPersonLabel.getText().split(" /");
+		totalPersonLabel.setText(x[0]+" / 선택한 직원 :  "+checkList.size()+"명");
 	}
 
 	class MyTableCellRenderer extends DefaultTableCellRenderer {
@@ -199,20 +203,20 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 	public BottomPanel() { // KTH + LJH
 		setLayout(new BorderLayout());
 		updatePanel.setLayout(new BorderLayout());
+		updateNewPanel.setLayout(new BorderLayout());
 		
 		updatePanel.add(totalPersonLabel, BorderLayout.NORTH);
-		updatePanel.add(updateLabel, BorderLayout.CENTER);
+		add(updateLabel, BorderLayout.NORTH);
 		
 		JLabel newSalLabel = new JLabel("새로운 Salary : ");
-		newSalLabel.setBounds(20, 10, 100,30);
-		updateNewPanel.add(newSalLabel);
+		updateNewPanel.add(newSalLabel, BorderLayout.WEST);
 		
-		updateNewPanel.add(newSalInp);
+		updateNewPanel.add(newSalInp, BorderLayout.CENTER);
 		JButton updateBT = new JButton("수정하기");
 		updateBT.addActionListener(new myUpdateListener());
-		updateNewPanel.add(updateBT);
+		updateNewPanel.add(updateBT, BorderLayout.EAST);
 		
-		updatePanel.add(updateNewPanel, BorderLayout.SOUTH);
+		updatePanel.add(updateNewPanel, BorderLayout.WEST);
 		add(updatePanel, BorderLayout.WEST);
 		
 		JLabel removeLabel = new JLabel("선택한 데이터 삭제");
