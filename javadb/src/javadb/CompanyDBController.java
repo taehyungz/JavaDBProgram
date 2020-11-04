@@ -296,15 +296,9 @@ public class CompanyDBController { // LJH
         CompanyDBController cont = new CompanyDBController(file);
 
         int[] checked = {1,1,1,1,1,1,1,1};
-        //int[] checked = {0,0,0,0,0,0,0,0};
-
-        //System.out.println(cont.getResult(cont.selectEmp(checked)));
 
         System.out.println(Arrays.toString(cont.getAttrsName(cont.selectEmp(checked))));
         Object[][] result = cont.getTuples(cont.selectEmp(checked));
-        for(Object[] strArr : result) {
-            System.out.println(Arrays.toString(strArr));
-        }
 
         cont.deconnectDB();
     }

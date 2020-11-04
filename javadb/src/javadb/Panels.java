@@ -8,6 +8,7 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -19,8 +20,6 @@ interface totalInterface {
 	JButton selectButton = new JButton("검색하기");
 	JLabel updateLabel = new JLabel("   검색한 직원  : " );
 	JLabel totalPersonLabel = new JLabel("  인원 수  : ");
-//	public void updateCount(int count);
-//	public void updateNameList(String nameList);
 } 
 	
 public class Panels extends JPanel{ // KTH
@@ -33,12 +32,12 @@ public class Panels extends JPanel{ // KTH
 	public Panels() {
 		File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
 		cont = new CompanyDBController(file);
-		
 		attrNames = cont.getAttrs();
 	}
 }
 
 class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
+	JFrame jFrame;
 	JPanel groupingPanel = new JPanel();
 	JPanel columnsDTselectPanel = new JPanel();
 	JPanel selBtnPanel = new JPanel();
@@ -66,6 +65,7 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 	public OptionPanel(JFrame jf) {
 		
 		try {
+			jFrame = jf;
 			searchQuery();
 
 			JLabel teamName = new JLabel("직원 정보 검색 시스템");
@@ -86,8 +86,7 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			add(groupingPanel,BorderLayout.WEST);
 			add(columnsDTselectPanel,BorderLayout.CENTER);
 			add(selBtnPanel,BorderLayout.EAST);
-		} catch(Exception e) {
-			
+		} catch(Exception e) {	
 		}
 	}
 
@@ -104,18 +103,19 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			else
 				select = 0;
 			checkValues[num] = select;
-			System.out.println(Arrays.toString(checkValues));
 		}
 	}
 	
 	class mySelectListener implements ActionListener{ // KTH
 		public mySelectListener() {
-			
 		}
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("checkbox : "+Arrays.toString(checkValues));
-			System.out.println("쿼리문을 실행합니다.");
+			int[] nullCheckBox = {0,0,0,0,0,0,0,0};
+			if(Arrays.equals(checkValues, nullCheckBox)) {
+				JOptionPane.showMessageDialog(jFrame, "최소 하나 이상의 Attribute를 선택해주세요.");
+				return;
+			}
 			searchQuery ();
 			updateNameList();
 		}
@@ -138,40 +138,28 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			while(pidResult.next()){
 				ArrayList<String> pidSet = new ArrayList<>();
 				for(int i=1; i<3; i++){
-					System.out.println(i);
 					pidSet.add(pidResult.getString(i));
-					System.out.println(pidResult.getString(i));
 				}
-				System.out.println(pidSet);
 				pidList.add(pidSet);
-			}
-			
-			System.out.println(pidList);
-			
+			}	
 			DefaultTableCellRenderer dcr = new MyTableCellRenderer();
 			table.getColumn("CheckBox").setPreferredWidth(15);
 			dcr.setHorizontalAlignment(SwingConstants.CENTER);
 			table.getColumn("CheckBox").setCellRenderer(dcr);
 		
-		} catch(Exception sqle) {
-			
+		} catch(Exception sqle) {		
 		}
 	}
 	
 	public void updateNameList() {
-
 		String nameList = "선택한 직원  :  ";
-		System.out.println(checkList);
-		System.out.println(pidList);
 		
 		for(int i=0; i<checkList.size(); i++){
-			System.out.println(i);
 			if(i!=checkList.size()-1){
 				nameList = nameList + pidList.get(checkList.get(i)).get(0)+"  /  ";
 			}else{
 				nameList = nameList + pidList.get(checkList.get(i)).get(0);
 			}
-			System.out.println(nameList);
 		}
 		updateLabel.setText(nameList);
 	}
@@ -198,7 +186,6 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			}
 			return comp;
 		}
-
 	}
 }
 
@@ -212,7 +199,6 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 	public BottomPanel() { // KTH + LJH
 		setLayout(new BorderLayout());
 		updatePanel.setLayout(new BorderLayout());
-		
 		
 		updatePanel.add(totalPersonLabel, BorderLayout.NORTH);
 		updatePanel.add(updateLabel, BorderLayout.CENTER);
@@ -249,19 +235,8 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 			} catch(Exception nullInput) {
 				newSalary = 0;
 			}
-			
-//			for(int m=0;m<selectedSSNs.length;m++) {
-//				System.out.println(selectedSSNs[m]);
-//				try {
-//					cont.updateEmp(selectedSSNs[m], newSalary);
-//				} catch(Exception notUpdated) {
-//					System.out.println("수정되지 않았습니다.");
-//				}
-//			}
 			System.out.println(newSalInp.getText());
-		}
-		
-		
+		}	
 	}
 
 	class myButtonListener implements ActionListener { // LJH
@@ -269,16 +244,7 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			//cont.deleteEmp(ssn);
-			System.out.println("push button!");
-//			for(int m=0;m<selectedSSNs.length;m++) {
-//				System.out.println(selectedSSNs[m]);
-//				try {
-//					cont.deleteEmp(selectedSSNs[m]);
-//				} catch(Exception notUpdated) {
-//					System.out.println("삭제되지 않았습니다.");
-//				}
-//			}
+			
 		}
 	}
 }
