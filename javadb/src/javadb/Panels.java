@@ -28,29 +28,14 @@ public class Panels extends JPanel{ // KTH
 	String tableName = "";
 	String[] columnsDT = {};
 	String path = System.getProperty("user.dir");
-	String id = "";
-	String password="";
-	String dbname="";
 	String[] attrNames = null;
 
 	CompanyDBController cont = null;
 	public Panels() {
-		try {
-			File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
-			FileReader filereader = new FileReader(file);
-			BufferedReader bufReader = new BufferedReader(filereader);
-			String id = bufReader.readLine();
-			String password = bufReader.readLine();
-			String dbname = bufReader.readLine();
-			cont = new CompanyDBController(id, password, dbname);
-			
-			attrNames = cont.getAttrs();
-			
-		} catch(Exception errDBInfo) {
-			String id = "!";
-			String password = "@";
-			String dbname = "#";
-		}
+		File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
+		cont = new CompanyDBController(file);
+		
+		attrNames = cont.getAttrs();
 	}
 }
 
@@ -58,7 +43,7 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 	JPanel groupingPanel = new JPanel();
 	JPanel columnsDTselectPanel = new JPanel();
 	JPanel selBtnPanel = new JPanel();
-	int[] checkValues = {1,1,1,1,1,1,1,1};//new int[10];
+	int[] checkValues = {1,1,1,1,1,1,1,1};
 	JCheckBox[] checkBoxes = new JCheckBox[10];
 	String[] colsArr = null;
 	Object[] contentRow;
