@@ -73,13 +73,19 @@ public class CompanyDBController { // LJH
             }
         }
 
-        stmt = stmt.substring(0,stmt.length()-2);
+        if(stmt.substring(stmt.length()-2,stmt.length()).equals(", ")) {
+            stmt = stmt.substring(0,stmt.length()-2);
+            stmt += " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
+                    " JOIN DEPARTMENT ON E.Dno = Dnumber";
+        } else {
+            stmt += "null";
+        }
         
-        stmt += " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
-                " JOIN DEPARTMENT ON E.Dno = Dnumber";
+        
 
         try {
-            PreparedStatement p = conn.prepareStatement(stmt);
+            PreparedStatement p =
+                conn.prepareStatement(stmt,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
 
             return p.executeQuery();
         } catch(SQLException sqle) {
@@ -240,13 +246,45 @@ public class CompanyDBController { // LJH
         return result;
     }
 
-    public String[][] getTuples(ResultSet r) {
+    public String[] getAttrs(ResultSet r) {
         try {
             ResultSetMetaData rsmd = r.getMetaData();
-            
-        } catch(SQLException sqle) {}
+            int colNum = rsmd.getColumnCount();
+            String[] result = new String[colNum];
+            for(int i=0; i < result.length; i++) {
+                result[i] = rsmd.getColumnName(i+1);
+            }
+            return result;
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
+            return null;
+        }
+        
+    }
 
-        return null;
+    public Object[][] getTuples(ResultSet r) {
+        try {
+            ResultSetMetaData rsmd = r.getMetaData();
+            int rowNum = 0;
+            if(r.last()) {
+                rowNum = r.getRow();
+                r.beforeFirst();
+            }
+            int colNum = rsmd.getColumnCount();
+            Object[][] result = new Object[rowNum][colNum];
+            int row = 0;
+            while(r.next()) {
+                for(int col = 0; col < colNum; col++) {
+                    result[row][col] = r.getString(col+1);
+                }
+                row++;
+            }
+            
+            return result;
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
+            return null;
+        }
     }
 
     public static void main(String[] args) {
@@ -254,9 +292,16 @@ public class CompanyDBController { // LJH
         File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
         CompanyDBController cont = new CompanyDBController(file);
 
-        int[] checked = {1,0,0,1,1,1,1,1,1,1};
+        int[] checked = {1,1,1,1,1,1,1,1};
+        //int[] checked = {0,0,0,0,0,0,0,0};
 
-        System.out.println(cont.getResult(cont.selectEmp(checked)));
+        //System.out.println(cont.getResult(cont.selectEmp(checked)));
+
+        System.out.println(Arrays.toString(cont.getAttrs(cont.selectEmp(checked))));
+        Object[][] result = cont.getTuples(cont.selectEmp(checked));
+        for(Object[] strArr : result) {
+            System.out.println(Arrays.toString(strArr));
+        }
 
         cont.deconnectDB();
     }

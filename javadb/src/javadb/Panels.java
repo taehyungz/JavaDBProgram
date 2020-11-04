@@ -74,8 +74,6 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 
 			scrollPanel = new JScrollPane(table);
 			
-			scrollPanel.setPreferredSize(new Dimension(1180,600));//(1000,600);
-			
 			jf.add(scrollPanel,BorderLayout.CENTER);
 
 			setLayout(new BorderLayout());
@@ -196,7 +194,7 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			defaultDcr.setHorizontalAlignment(SwingConstants.CENTER);
 			
 			table.getColumn("CheckBox").setCellRenderer(dcr);
-
+			
 			for (int i=1; i<table.getColumnCount(); i++){
 				String name = table.getColumnName(i);
 				table.getColumn(name).setCellRenderer(defaultDcr);
@@ -241,7 +239,8 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 	class MyTableCellRenderer extends DefaultTableCellRenderer {
 
 		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column){
+		public Component getTableCellRendererComponent
+		(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			JCheckBox comp = null;
 			comp = new JCheckBox();
 			comp.setHorizontalAlignment(SwingConstants.CENTER);
