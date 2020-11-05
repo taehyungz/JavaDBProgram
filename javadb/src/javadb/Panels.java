@@ -29,6 +29,23 @@ public class Panels extends JPanel{ // KTH
 	String[] attrNames = null;
 
 	CompanyDBController cont = null;
+
+	//PHJ
+	int ComboSelect;
+	String ParName;
+	String ChildName;
+	String ParComboName[] = {"전체","NAME","SSN","BDATE","ADDRESS","SEX","SALARY","SUPERVISOR","DEPARTMENT"};
+	String[] ChildComboName = ParComboName.clone();
+
+	//콤보박스 객체
+	JComboBox<String> ParCombo;
+	JComboBox<String> ChildCombo;
+	String inputPar="";
+	String inputChild="";
+	
+	String Par = "";
+	String child = "";
+
 	public Panels() {
 		File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
 		cont = new CompanyDBController(file);
@@ -63,31 +80,40 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 	};
 	
 	public OptionPanel(JFrame jf) {
+		ParCombo = new JComboBox<String>(ParComboName);
+		ChildCombo = new JComboBox<String>(ChildComboName);
 		
-		try {
-			jFrame = jf;
-			searchQuery();
+		jFrame = jf;
+		searchQuery();
 
-			JLabel teamName = new JLabel("직원 정보 검색 시스템");
-			groupingPanel.add(teamName);
+		JLabel teamName = new JLabel("직원 정보 검색 시스템");
+		groupingPanel.add(teamName);
 
-			JLabel startAttr = new JLabel("Select Attributes");
-			columnsDTselectPanel.add(startAttr);
-			
-			for(int i=0;i<attrNames.length;i++) {
-				checkBoxes[i] = new JCheckBox(attrNames[i], true);
-				columnsDTselectPanel.add(checkBoxes[i]);
-				checkBoxes[i].addItemListener(new myItemListener(i));
-			}
+		JLabel startAttr = new JLabel("Select Attributes");
+		columnsDTselectPanel.add(startAttr);
 
-			selectButton.addActionListener(new mySelectListener());
-			selBtnPanel.add(selectButton);
-
-			add(groupingPanel,BorderLayout.WEST);
-			add(columnsDTselectPanel,BorderLayout.CENTER);
-			add(selBtnPanel,BorderLayout.EAST);
-		} catch(Exception e) {	
+		//콤보박스 추가
+		columnsDTselectPanel.add(ParCombo);
+		columnsDTselectPanel.add(ChildCombo);
+		ParCombo.setVisible(true);			
+		ChildCombo.setVisible(false);
+		
+		for(int i=0;i<attrNames.length;i++) {
+			checkBoxes[i] = new JCheckBox(attrNames[i], true);
+			columnsDTselectPanel.add(checkBoxes[i]);
+			checkBoxes[i].addItemListener(new myItemListener(i));
 		}
+
+		selectButton.addActionListener(new mySelectListener());
+		selBtnPanel.add(selectButton);
+
+		// Event Listener
+		ParCombo.addActionListener(new ComboEvent());
+
+		add(groupingPanel,BorderLayout.WEST);
+		add(columnsDTselectPanel,BorderLayout.CENTER);
+		add(selBtnPanel,BorderLayout.EAST);
+		
 	}
 
 
@@ -116,17 +142,21 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 				JOptionPane.showMessageDialog(jFrame, "최소 하나 이상의 Attribute를 선택해주세요.");
 				return;
 			}
+			if(ParCombo.getSelectedIndex() != 0 && ChildCombo.getSelectedItem() == null) {
+				JOptionPane.showMessageDialog(jFrame, "하위 옵션이 선택되지 않았습니다.");
+				return;
+			}
 			searchQuery ();
 			updateNameList();
 		}
 	}
 
 	private void searchQuery (){
-		try{
+		try{			
 			updateNameList();
-			
-			colsArr = cont.getAttrsName(cont.selectEmp(checkValues));
-			contents = cont.getTuples(cont.selectEmp(checkValues));
+
+			colsArr = cont.getAttrsName(cont.selectEmp(checkValues, ParCombo.getSelectedIndex(),(String)ChildCombo.getSelectedItem()));
+			contents = cont.getTuples(cont.selectEmp(checkValues, ParCombo.getSelectedIndex(),(String)ChildCombo.getSelectedItem()));
 			
 			int rowSize = contents.length;
 			totalPersonLabel.setText("검색한 직원  : "+rowSize+" 명");
@@ -143,7 +173,17 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 					pidSet.add(pidResult.getString(i));
 				}
 				pidList.add(pidSet);
-			}	
+			}
+
+			pidList.clear();
+			for (Object[] o : contents) {
+				ArrayList<String> pidSet = new ArrayList<>();
+				for(int i=1; i<=2; i++) {
+					pidSet.add((String)o[i]);
+				}
+				pidList.add(pidSet);
+			}
+
 			DefaultTableCellRenderer dcr = new MyTableCellRenderer();
 			table.getColumn("CheckBox").setPreferredWidth(15);
 			dcr.setHorizontalAlignment(SwingConstants.CENTER);
@@ -189,6 +229,40 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 				}
 			}
 			return comp;
+		}
+	}
+
+	//콤보박스 이벤트
+	class ComboEvent implements ActionListener { // PHJ
+		
+		//콤보박스 action처리
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Par = ParCombo.getSelectedItem().toString();
+			
+			System.out.println("Par : "+Par);
+			
+			if(Par=="전체") {
+				System.out.println("전체 진입");
+				//ChildCombo.removeAll();
+				ChildCombo.removeAllItems();
+				ChildCombo.setVisible(false);
+			} else {
+				int size = cont.ChildSearch(Par,ChildComboName);
+
+				String[] temp = ChildComboName.clone();
+				ChildCombo.removeAllItems();
+				int idx=0;
+				for(int i= 0;i<size;i++) {
+					if(temp[i] != null) {
+						ChildCombo.insertItemAt(temp[i], idx);
+						idx++;
+					}
+				}
+				
+				ChildCombo.setVisible(false);
+				ChildCombo.setVisible(true);
+			}
 		}
 	}
 }
