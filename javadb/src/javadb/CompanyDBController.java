@@ -2,8 +2,6 @@ package javadb;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-
 import java.io.*;
 
 public class CompanyDBController { // LJH
@@ -136,44 +134,12 @@ public class CompanyDBController { // LJH
         }
 
         stmt += par;
-        System.out.println("debug::" + stmt);
         try {
             PreparedStatement p = conn.prepareStatement(stmt);
             return p.executeQuery();
         } catch(SQLException sqle) {
             sqle.printStackTrace();
             return null;
-        }
-    }
-    
-    public boolean insertEmp(String name, String ssn, String birDate,
-        String address, char sex, double salary, String mgr_ssn, int dnum)
-        throws SQLException {
-
-        String stmt = "INSERT INTO EMPLOYEE ";
-        stmt += "VALUES (?,?,?,?,?,?,?,?,?,?)";
-
-        String[] names = name.split(" ");
-
-        PreparedStatement p = conn.prepareStatement(stmt);
-        p.clearParameters();
-        p.setString(1, names[0]);
-        p.setString(2, names[1]);
-        p.setString(3, names[2]);
-        p.setString(4, ssn);
-        p.setDate(5, Date.valueOf(birDate));
-        p.setString(6, address);
-        p.setString(7, String.valueOf(sex));
-        p.setDouble(8, salary);
-        p.setString(9, mgr_ssn);
-        p.setInt(10, dnum);
-        
-        try {
-            p.executeUpdate();
-            return true;
-        } catch(SQLException sqle) {
-            sqle.printStackTrace();
-            return false;
         }
     }
 
@@ -361,7 +327,6 @@ public class CompanyDBController { // LJH
             ResultSet r = p.executeQuery();
             while(r.next()) {
                 ArrList.add(r.getString(1));
-                //System.out.println(r.getString(1));
             }
 
             String[] result = new String[ArrList.size()];
@@ -375,21 +340,5 @@ public class CompanyDBController { // LJH
             sqle.printStackTrace();
             return -1;
         }
-    }
-
-    public static void main(String[] args) {
-        String path = System.getProperty("user.dir");
-        File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
-        CompanyDBController cont = new CompanyDBController(file);
-
-        int[] checked = {1,1,1,1,1,1,1,1};
-        String Par = "전체";
-
-        System.out.println(Arrays.toString(cont.getAttrsName(cont.selectEmp(checked,7,"Research"))));
-        Object[][] result = cont.getTuples(cont.selectEmp(checked,7,"Research"));
-        for(Object[] o : result) {
-            System.out.println(Arrays.toString(o));
-        }
-        cont.deconnectDB();
     }
 }

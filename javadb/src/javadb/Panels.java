@@ -4,12 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -20,6 +17,7 @@ interface totalInterface {
 	JButton selectButton = new JButton("검색하기");
 	JLabel updateLabel = new JLabel("   검색한 직원  : " );
 	JLabel totalPersonLabel = new JLabel("  인원 수  : ");
+	String selectedSsns = "";
 } 
 	
 public class Panels extends JPanel{ // KTH
@@ -59,13 +57,13 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 	JPanel columnsDTselectPanel = new JPanel();
 	JPanel selBtnPanel = new JPanel();
 	int[] checkValues = {1,1,1,1,1,1,1,1};
-	JCheckBox[] checkBoxes = new JCheckBox[8];
-	String[] colsArr = null;
-	Object[][] contents;
+	JCheckBox[] checkBoxes = new JCheckBox[8]; //attribute 선택 체크박스
+	String[] colsArr = null; // 사용하는 속성들
+	Object[][] contents; // 레코드들
 	DefaultTableModel defaultTableModel = new DefaultTableModel(contents, colsArr);
 
 	//check list and person ArrayList
-	ArrayList<Integer> checkList = new ArrayList<Integer>();
+	ArrayList<Integer> checkList = new ArrayList<Integer>(); // 체크한 것들의 행번호(0부터 시작)
 	ArrayList<ArrayList<String>> pidList = new ArrayList<ArrayList<String>>();
 
 	JTable table = new JTable(defaultTableModel) {
@@ -152,7 +150,7 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 		}
 	}
 
-	private void searchQuery (){
+	public void searchQuery (){
 		try{			
 			updateNameList();
 
@@ -232,10 +230,7 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 		public void actionPerformed(ActionEvent e) {
 			Par = ParCombo.getSelectedItem().toString();
 			
-			System.out.println("Par : "+Par);
-			
 			if(Par=="전체") {
-				System.out.println("전체 진입");
 				ChildCombo.removeAllItems();
 				ChildCombo.setVisible(false);
 			} else {
@@ -264,8 +259,12 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 	JPanel removePanel = new JPanel(); // LJH
 	JTextField newSalInp = new JTextField(10);
 	double newSalary = 0;
+	OptionPanel optionPanel;
+	JFrame jFrame;
 
-	public BottomPanel() { // KTH + LJH
+
+	public BottomPanel(OptionPanel optionPanel, JFrame jFrame) { // KTH + LJH
+		this.optionPanel = optionPanel;
 		setLayout(new BorderLayout());
 		updatePanel.setLayout(new BorderLayout());
 		updateNewPanel.setLayout(new BorderLayout());
@@ -287,9 +286,9 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 		JLabel removeLabel = new JLabel("선택한 데이터 삭제");
 		removePanel.add(removeLabel);
 
-		JButton selectButton = new JButton("삭제");
-		selectButton.addActionListener(new myButtonListener());
-		removePanel.add(selectButton);
+		JButton deleteButton = new JButton("삭제");
+		deleteButton.addActionListener(new myDeleteListener());
+		removePanel.add(deleteButton);
 
 		add(removePanel, BorderLayout.EAST);
 	}
@@ -299,22 +298,38 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			if(optionPanel.checkList.size()==0){
+				JOptionPane.showMessageDialog(jFrame, "한 명 이상의 직원을 선택해주세요.");
+				return;
+			}
 			try{
 				newSalary = Double.parseDouble(newSalInp.getText());
 			} catch(Exception nullInput) {
-				newSalary = 0;
+				JOptionPane.showMessageDialog(jFrame, "변경할 급여를 입력해주세요.");
+				return;
 			}
-			System.out.println(newSalInp.getText());
-
+			for(int i=0;i<optionPanel.checkList.size();i++){
+				String selectedSsn = optionPanel.pidList.get(optionPanel.checkList.get(i)).get(1);
+				cont.updateEmp(selectedSsn, newSalary);
+			}
+			optionPanel.searchQuery();
+			optionPanel.updateNameList();
+			newSalInp.setText(null);
 		}	
 	}
 
-	class myButtonListener implements ActionListener { // LJH
-		public myButtonListener() {}
+	class myDeleteListener implements ActionListener { // LJH
+		public myDeleteListener() {}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			
+			for(int i=0;i<optionPanel.checkList.size();i++){
+				String selectedSsn = optionPanel.pidList.get(optionPanel.checkList.get(i)).get(1);
+				cont.deleteEmp(selectedSsn);
+				
+			}
+			optionPanel.searchQuery();
+			optionPanel.updateNameList();
 		}
 	}
 }
