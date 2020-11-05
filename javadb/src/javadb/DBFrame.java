@@ -2,9 +2,7 @@ package javadb;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-
 import javax.swing.JFrame;
-
 import javax.swing.JScrollPane;
 
 
@@ -16,7 +14,7 @@ public class DBFrame extends JFrame{ // KTH
 		Container contentPane = getContentPane();
 		OptionPanel optionPanel = new OptionPanel(this);
 		JScrollPane scrollPane = new JScrollPane(optionPanel.table);
-		BottomPanel bottomPanel = new BottomPanel();
+		BottomPanel bottomPanel = new BottomPanel(optionPanel, this);
 		
 		contentPane.add(optionPanel, BorderLayout.NORTH);
 		contentPane.add(scrollPane, BorderLayout.CENTER);

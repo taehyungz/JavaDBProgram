@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 public class GUIProgram{ // KTH
 	public static void main(String[] args){
 		Frame frame = new DBFrame();
-		frame.setSize(1200,800);
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setVisible(true);
 	}
 }

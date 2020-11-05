@@ -2,8 +2,6 @@ package javadb;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-
 import java.io.*;
 
 public class CompanyDBController { // LJH
@@ -63,26 +61,42 @@ public class CompanyDBController { // LJH
             return false;
         } catch(SQLException e){ return false;}
     }
-    // 부서 선택, 애트리뷰트 선택, 조건 선택
-    public ResultSet selectEmp(int[] checked) {
+
+    // 콤보관련 쿼리 수정 (PHJ)
+    public ResultSet selectEmp(int[] checked, int ParIndex, String ChildItem) {
         String[] attrName = {"CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME", "E.SSN", "E.BDATE", "E.ADDRESS", "E.SEX", "E.SALARY",
-                             "CONCAT(S.fname,' ',S.Minit,' ',S.Fname) AS SUPERVISOR", "Dname AS DEPARTMENT"};
+                             "CONCAT(S.Fname,' ',S.Minit,' ',S.Lname) AS SUPERVISOR", "Dname AS DEPARTMENT"};
         String stmt = "SELECT ";
         for(int i = 0; i < checked.length; i++) {
             if(checked[i] == 1) {
                 stmt += attrName[i] + ", ";
             }
         }
-
+        //{"전체","BDATE","SEX","SALARY","SUPERVISOR","DEPARTMENT"};
+        String par = " WHERE ";
+        switch(ParIndex) {
+            case 0:
+                par = "";
+                break;
+            case 1:
+                par += attrName[ParIndex+1] + " = \"" + ChildItem + "\"";
+                break;
+            case 4:
+            case 5:
+                par += attrName[ParIndex+2].split(" AS ")[0] + " = \"" + ChildItem + "\"";
+                break;
+            default:
+                par += attrName[ParIndex+2]+ " = \"" + ChildItem + "\"";
+                break;
+        }
         if(stmt.substring(stmt.length()-2,stmt.length()).equals(", ")) {
             stmt = stmt.substring(0,stmt.length()-2);
             stmt += " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
                     " JOIN DEPARTMENT ON E.Dno = Dnumber";
+            stmt += par;
         } else {
             stmt += "null";
         }
-        
-        
 
         try {
             PreparedStatement p =
@@ -95,9 +109,31 @@ public class CompanyDBController { // LJH
         }
     }
 
-    public ResultSet selectSsn() {
-        String stmt = "SELECT CONCAT(Fname,' ',Minit,' ',Lname) AS NAME, SSN FROM EMPLOYEE;";
- 
+    public ResultSet selectSsn(int ParIndex, String ChildItem) {
+        String[] attrName = {"CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME", "E.SSN", "E.BDATE", "E.ADDRESS", "E.SEX", "E.SALARY",
+                             "CONCAT(S.Fname,' ',S.Minit,' ',S.Lname) AS SUPERVISOR", "Dname AS DEPARTMENT"};
+        String stmt = "SELECT CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME, E.SSN";
+        stmt += " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
+                    " JOIN DEPARTMENT ON E.Dno = Dnumber";
+        
+        String par = " WHERE ";
+        switch(ParIndex) {
+            case 0:
+                par = "";
+                break;
+            case 1:
+                par += attrName[ParIndex+1] + " = \"" + ChildItem + "\"";
+                break;
+            case 4:
+            case 5:
+                par += attrName[ParIndex+2].split(" AS ")[0] + " = \"" + ChildItem + "\"";
+                break;
+            default:
+                par += attrName[ParIndex+2]+ " = \"" + ChildItem + "\"";
+                break;
+        }
+
+        stmt += par;
         try {
             PreparedStatement p = conn.prepareStatement(stmt);
             return p.executeQuery();
@@ -106,42 +142,11 @@ public class CompanyDBController { // LJH
             return null;
         }
     }
-    
-    public boolean insertEmp(String name, String ssn, String birDate,
-        String address, char sex, double salary, String mgr_ssn, int dnum)
-        throws SQLException {
-
-        String stmt = "INSERT INTO EMPLOYEE ";
-        stmt += "VALUES (?,?,?,?,?,?,?,?,?,?)";
-
-        String[] names = name.split(" ");
-
-        PreparedStatement p = conn.prepareStatement(stmt);
-        p.clearParameters();
-        p.setString(1, names[0]);
-        p.setString(2, names[1]);
-        p.setString(3, names[2]);
-        p.setString(4, ssn);
-        p.setDate(5, Date.valueOf(birDate));
-        p.setString(6, address);
-        p.setString(7, String.valueOf(sex));
-        p.setDouble(8, salary);
-        p.setString(9, mgr_ssn);
-        p.setInt(10, dnum);
-        
-        try {
-            p.executeUpdate();
-            return true;
-        } catch(SQLException sqle) {
-            sqle.printStackTrace();
-            return false;
-        }
-    }
 
     public String[] getAttrs() {
         try {
             String stmt = "SELECT CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME, E.SSN, E.BDATE, E.ADDRESS, E.SEX," +
-                            " E.SALARY, CONCAT(S.fname,' ',S.Minit,' ',S.Fname) AS SUPERVISIOR, Dname AS DEPARTMENT" + 
+                            " E.SALARY, CONCAT(S.Fname,' ',S.Minit,' ',S.Lname) AS SUPERVISIOR, Dname AS DEPARTMENT" + 
                             " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
                             " JOIN DEPARTMENT ON E.Dno = Dnumber";
             PreparedStatement p = conn.prepareStatement(stmt);
@@ -254,7 +259,7 @@ public class CompanyDBController { // LJH
             String[] result = new String[colNum];
             result[0] = "CheckBox";
             for(int i=1; i < result.length; i++) {
-                result[i] = rsmd.getColumnName(i);
+                result[i] = rsmd.getColumnLabel(i);
             }
             return result;
         } catch(SQLException sqle) {
@@ -290,16 +295,50 @@ public class CompanyDBController { // LJH
         }
     }
 
-    public static void main(String[] args) {
-        String path = System.getProperty("user.dir");
-        File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
-        CompanyDBController cont = new CompanyDBController(file);
+    ////콤보박스 자식검색 쿼리 검색(PHJ)
+    public int ChildSearch(String Par,ArrayList<String> Child) { // PHJ
+    	String stmt="";
+    	ArrayList<String> ArrList = new ArrayList<String>();
+    	int size=0;
+    	
+    	if(Par =="전체") {
+    		return 0;
+    	}
+    	else if(Par == "SUPERVISOR") {
+    		stmt = "SELECT " + 
+    				"DISTINCT CONCAT(S.Fname,' ',S.Minit,' ',S.Lname) AS SUPERVISOR "+
+    				"FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn) " + 
+    				"JOIN DEPARTMENT ON E.Dno = Dnumber";
+    	}
+    	else if(Par == "DEPARTMENT") {
+    		stmt="SELECT " + 
+    				"DISTINCT Dname " + 
+    				"FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn) " + 
+    				"JOIN DEPARTMENT ON E.Dno = Dnumber";
+    		
+    	}
+    	else {
+    		stmt = "SELECT DISTINCT "+Par+" FROM EMPLOYEE";
+    	}
+    	
+    	try{
+            PreparedStatement p = conn.prepareStatement(stmt);  
+            
+            ResultSet r = p.executeQuery();
+            while(r.next()) {
+                ArrList.add(r.getString(1));
+            }
 
-        int[] checked = {1,1,1,1,1,1,1,1};
-
-        System.out.println(Arrays.toString(cont.getAttrsName(cont.selectEmp(checked))));
-        Object[][] result = cont.getTuples(cont.selectEmp(checked));
-
-        cont.deconnectDB();
+            String[] result = new String[ArrList.size()];
+            ArrList.toArray(result);
+            for(int i = 0;i<ArrList.size();i++) {
+                Child.add(i, ArrList.get(i));
+            }
+            size = result.length;
+            return size;
+        } catch(SQLException sqle) {
+            sqle.printStackTrace();
+            return -1;
+        }
     }
 }
