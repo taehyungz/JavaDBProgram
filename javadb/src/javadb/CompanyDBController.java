@@ -74,19 +74,21 @@ public class CompanyDBController { // LJH
                 stmt += attrName[i] + ", ";
             }
         }
-
+        //{"전체","BDATE","SEX","SALARY","SUPERVISOR","DEPARTMENT"};
         String par = " WHERE ";
         switch(ParIndex) {
             case 0:
                 par = "";
                 break;
             case 1:
-            case 7:
-            case 8:
-                par += attrName[ParIndex-1].split(" AS ")[0] + " = \"" + ChildItem + "\"";
+                par += attrName[ParIndex+1] + " = \"" + ChildItem + "\"";
+                break;
+            case 4:
+            case 5:
+                par += attrName[ParIndex+2].split(" AS ")[0] + " = \"" + ChildItem + "\"";
                 break;
             default:
-                par += attrName[ParIndex-1]+ " = \"" + ChildItem + "\"";
+                par += attrName[ParIndex+2]+ " = \"" + ChildItem + "\"";
                 break;
         }
         if(stmt.substring(stmt.length()-2,stmt.length()).equals(", ")) {
@@ -109,9 +111,32 @@ public class CompanyDBController { // LJH
         }
     }
 
-    public ResultSet selectSsn() {
-        String stmt = "SELECT CONCAT(Fname,' ',Minit,' ',Lname) AS NAME, SSN FROM EMPLOYEE;";
- 
+    public ResultSet selectSsn(int ParIndex, String ChildItem) {
+        String[] attrName = {"CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME", "E.SSN", "E.BDATE", "E.ADDRESS", "E.SEX", "E.SALARY",
+                             "CONCAT(S.Fname,' ',S.Minit,' ',S.Lname) AS SUPERVISOR", "Dname AS DEPARTMENT"};
+        String stmt = "SELECT CONCAT(E.Fname,' ',E.Minit,' ',E.Lname) AS NAME, E.SSN";
+        stmt += " FROM (EMPLOYEE AS E LEFT JOIN EMPLOYEE AS S ON E.Super_ssn = S.Ssn)" +
+                    " JOIN DEPARTMENT ON E.Dno = Dnumber";
+        
+        String par = " WHERE ";
+        switch(ParIndex) {
+            case 0:
+                par = "";
+                break;
+            case 1:
+                par += attrName[ParIndex+1] + " = \"" + ChildItem + "\"";
+                break;
+            case 4:
+            case 5:
+                par += attrName[ParIndex+2].split(" AS ")[0] + " = \"" + ChildItem + "\"";
+                break;
+            default:
+                par += attrName[ParIndex+2]+ " = \"" + ChildItem + "\"";
+                break;
+        }
+
+        stmt += par;
+        System.out.println("debug::" + stmt);
         try {
             PreparedStatement p = conn.prepareStatement(stmt);
             return p.executeQuery();
@@ -305,17 +330,13 @@ public class CompanyDBController { // LJH
     }
 
     ////콤보박스 자식검색 쿼리 검색(PHJ)
-    public int ChildSearch(String Par,String[] Child) { // PHJ
+    public int ChildSearch(String Par,ArrayList<String> Child) { // PHJ
     	String stmt="";
     	ArrayList<String> ArrList = new ArrayList<String>();
     	int size=0;
     	
     	if(Par =="전체") {
     		return 0;
-    	}
-    	else if(Par == "NAME") {
-    		stmt="select distinct concat(fname, ' ',minit, ' ',lname) from employee;";
-
     	}
     	else if(Par == "SUPERVISOR") {
     		stmt = "SELECT " + 
@@ -346,7 +367,7 @@ public class CompanyDBController { // LJH
             String[] result = new String[ArrList.size()];
             ArrList.toArray(result);
             for(int i = 0;i<ArrList.size();i++) {
-                Child[i] = ArrList.get(i);
+                Child.add(i, ArrList.get(i));
             }
             size = result.length;
             return size;

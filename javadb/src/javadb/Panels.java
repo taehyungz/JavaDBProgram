@@ -34,8 +34,8 @@ public class Panels extends JPanel{ // KTH
 	int ComboSelect;
 	String ParName;
 	String ChildName;
-	String ParComboName[] = {"전체","NAME","SSN","BDATE","ADDRESS","SEX","SALARY","SUPERVISOR","DEPARTMENT"};
-	String[] ChildComboName = ParComboName.clone();
+	String ParComboName[] = {"전체","BDATE","SEX","SALARY","SUPERVISOR","DEPARTMENT"};
+	ArrayList<String> ChildComboName = new ArrayList<String>();
 
 	//콤보박스 객체
 	JComboBox<String> ParCombo;
@@ -81,7 +81,8 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 	
 	public OptionPanel(JFrame jf) {
 		ParCombo = new JComboBox<String>(ParComboName);
-		ChildCombo = new JComboBox<String>(ChildComboName);
+		String[] stringArray = Arrays.copyOf(ChildComboName.toArray(), ChildComboName.toArray().length, String[].class);
+		ChildCombo = new JComboBox<String>(stringArray);
 		
 		jFrame = jf;
 		searchQuery();
@@ -162,7 +163,7 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			totalPersonLabel.setText("검색한 직원  : "+rowSize+" 명");
 			defaultTableModel.setDataVector(contents,colsArr);
 
-			ResultSet pidResult = cont.selectSsn();
+			ResultSet pidResult = cont.selectSsn(ParCombo.getSelectedIndex(),(String)ChildCombo.getSelectedItem());
 			
 			pidList.clear();
 			checkList.clear();
@@ -171,15 +172,6 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 				ArrayList<String> pidSet = new ArrayList<>();
 				for(int i=1; i<3; i++){
 					pidSet.add(pidResult.getString(i));
-				}
-				pidList.add(pidSet);
-			}
-
-			pidList.clear();
-			for (Object[] o : contents) {
-				ArrayList<String> pidSet = new ArrayList<>();
-				for(int i=1; i<=2; i++) {
-					pidSet.add((String)o[i]);
 				}
 				pidList.add(pidSet);
 			}
@@ -244,18 +236,17 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 			
 			if(Par=="전체") {
 				System.out.println("전체 진입");
-				//ChildCombo.removeAll();
 				ChildCombo.removeAllItems();
 				ChildCombo.setVisible(false);
 			} else {
 				int size = cont.ChildSearch(Par,ChildComboName);
 
-				String[] temp = ChildComboName.clone();
+				// String[] temp = ChildComboName.clone();
 				ChildCombo.removeAllItems();
 				int idx=0;
 				for(int i= 0;i<size;i++) {
-					if(temp[i] != null) {
-						ChildCombo.insertItemAt(temp[i], idx);
+					if(ChildComboName.get(i) != null) {
+						ChildCombo.insertItemAt(ChildComboName.get(i), idx);
 						idx++;
 					}
 				}
@@ -314,6 +305,7 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 				newSalary = 0;
 			}
 			System.out.println(newSalInp.getText());
+
 		}	
 	}
 
