@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.swing.JButton;
@@ -19,14 +20,12 @@ interface totalInterface {
 	JLabel totalPersonLabel = new JLabel("  인원 수  : ");
 	String selectedSsns = "";
 } 
-	
+
 public class Panels extends JPanel{ // KTH
 	String tableName = "";
 	String[] columnsDT = {};
 	String path = System.getProperty("user.dir");
 	String[] attrNames = null;
-
-	CompanyDBController cont = null;
 
 	//PHJ
 	int ComboSelect;
@@ -45,9 +44,8 @@ public class Panels extends JPanel{ // KTH
 	String child = "";
 
 	public Panels() {
-		File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
-		cont = new CompanyDBController(file);
-		attrNames = cont.getAttrs();
+		//File file = new File(path+"\\src\\javadb\\db_connection_info.txt");
+		//cont = new CompanyDBController(file);
 	}
 }
 
@@ -61,6 +59,7 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 	String[] colsArr = null; // 사용하는 속성들
 	Object[][] contents; // 레코드들
 	DefaultTableModel defaultTableModel = new DefaultTableModel(contents, colsArr);
+	CompanyDBController cont;
 
 	//check list and person ArrayList
 	ArrayList<Integer> checkList = new ArrayList<Integer>(); // 체크한 것들의 행번호(0부터 시작)
@@ -77,7 +76,11 @@ class OptionPanel extends Panels implements totalInterface{ // KTH + PHJ
 		}
 	};
 	
-	public OptionPanel(JFrame jf) {
+	public OptionPanel(JFrame jf, String inputId, String inputPw) throws ClassNotFoundException, SQLException {
+		cont = new CompanyDBController(inputId, inputPw);
+		attrNames = cont.getAttrs();
+		
+		
 		ParCombo = new JComboBox<String>(ParComboName);
 		String[] stringArray = Arrays.copyOf(ChildComboName.toArray(), ChildComboName.toArray().length, String[].class);
 		ChildCombo = new JComboBox<String>(stringArray);
@@ -310,7 +313,7 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 			}
 			for(int i=0;i<optionPanel.checkList.size();i++){
 				String selectedSsn = optionPanel.pidList.get(optionPanel.checkList.get(i)).get(1);
-				cont.updateEmp(selectedSsn, newSalary);
+				optionPanel.cont.updateEmp(selectedSsn, newSalary);
 			}
 			optionPanel.searchQuery();
 			optionPanel.updateNameList();
@@ -325,7 +328,7 @@ class BottomPanel extends Panels implements totalInterface{ // KTH + LJH
 		public void actionPerformed(ActionEvent e) {
 			for(int i=0;i<optionPanel.checkList.size();i++){
 				String selectedSsn = optionPanel.pidList.get(optionPanel.checkList.get(i)).get(1);
-				cont.deleteEmp(selectedSsn);
+				optionPanel.cont.deleteEmp(selectedSsn);
 				
 			}
 			optionPanel.searchQuery();

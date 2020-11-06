@@ -9,7 +9,7 @@ public class CompanyDBController { // LJH
     private String sqlID = null;
     private String sqlPw = null;
 
-    public CompanyDBController(File f) {
+    public CompanyDBController(File f) throws SQLException {
         try {
             FileReader filereader = new FileReader(f);
             BufferedReader bufReader = new BufferedReader(filereader);
@@ -29,27 +29,23 @@ public class CompanyDBController { // LJH
         }
     }
 
-    public CompanyDBController(final String sqlID, final String sqlPw, final String dbName) {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver"); //JDBC 드라이버 연결
+	public CompanyDBController(final String sqlID, final String sqlPw) throws ClassNotFoundException, SQLException{
+		CompanyDBController(sqlID, sqlPw, "COMPANY");
+	}
 
-            this.sqlID = sqlID;
-            this.sqlPw = sqlPw;
-            this.connectDB(dbName);
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
-        }
-    }
+	private void CompanyDBController(final String sqlID, final String sqlPw, final String dbName) throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver"); //JDBC 드라이버 연결
 
-    public boolean connectDB(final String dbName){
-        try {
-            final String url = "jdbc:mysql://localhost:3306/"+dbName+"?serverTimezone=UTC";
-            conn = DriverManager.getConnection(url, sqlID, sqlPw);
-            return true;
-        } catch(SQLException sqle) {
-            sqle.printStackTrace();
-            return false;
-        }
+        this.sqlID = sqlID;
+        this.sqlPw = sqlPw;
+        this.connectDB(dbName);
+	}
+
+	public boolean connectDB(final String dbName) throws SQLException{
+        
+        final String url = "jdbc:mysql://localhost:3306/"+dbName+"?serverTimezone=UTC";
+        conn = DriverManager.getConnection(url, sqlID, sqlPw);
+        return true;
     }
 
     public boolean deconnectDB() {
